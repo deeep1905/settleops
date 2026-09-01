@@ -53,11 +53,11 @@ const RULES: [string, string, string, string][] = [
   ["S5", "proposals only", "no journal entry lands without an approval event", "test_proposals_need_approval_state"],
 ];
 
-const PROOF: [string, string][] = [
-  ["make test", "68 passed — matcher ground truth, stopping rules, API, audit chain"],
-  ["make report", "regenerated · bit-for-bit, hand-edits fail CI"],
-  ["make run", "engine on :8000 — the batch this page is showing"],
-  ["make console", "vite · this console, from source"],
+const PROOF: [string, string, string][] = [
+  ["make test", "68 tests — matcher ground truth, stopping rules, API, audit chain", "68 passed"],
+  ["make report", "numbers regenerate from the data, bit-for-bit — CI fails on any hand-edit", "byte-identical"],
+  ["make run", "the engine on :8000 — the same batch this page is showing", "live · batch R42"],
+  ["make console", "this console, built from source", "this page"],
 ];
 
 export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
@@ -77,8 +77,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
       {/* ------------------------------ hero ------------------------------ */}
       <section className="grid-bg card mb-8 grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:gap-10">
         <div>
-          <div className="rise inline-flex max-w-full items-center gap-2.5 rounded-full border border-line bg-surface px-3 py-1.5">
-            <span className="live-dot" aria-hidden />
+          <div className="rise inline-flex max-w-full items-center rounded-full border border-line bg-surface px-3.5 py-1.5">
             <span className="kicker truncate text-muted">
               razorpay ai buildathon 2026 · track 4
               <span className="hidden md:inline"> · ai finance controller</span>
@@ -241,42 +240,29 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           <SectionHead
             kicker="the proof layer"
             title="Every claim is a command"
-            note="ci runs make verify on every push"
+            note="run them yourself — the repo is the demo"
           />
         </Reveal>
         <Reveal delay={80}>
           <div className="card overflow-hidden">
-            {/* terminal chrome */}
-            <div className="flex items-center justify-between gap-3 border-b border-line bg-paper px-4 py-2.5">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-line2" aria-hidden />
-                <span className="h-2.5 w-2.5 rounded-full bg-line2" aria-hidden />
-                <span className="h-2.5 w-2.5 rounded-full bg-line2" aria-hidden />
-                <span className="kicker ml-2 truncate text-faint">settleops — the repo's own gate</span>
+            {PROOF.map(([cmd, d, result]) => (
+              <div
+                key={cmd}
+                className="group flex flex-col gap-1.5 border-b border-line/60 px-5 py-4 transition-colors last:border-0 hover:bg-paper/60 sm:flex-row sm:items-center sm:gap-4"
+              >
+                <code className="shrink-0 rounded-md border border-line bg-paper px-2.5 py-1 font-mono text-[12px] font-semibold text-ink transition-colors group-hover:border-line2 sm:w-[8.5rem] sm:text-center">
+                  {cmd}
+                </code>
+                <span className="text-[13px] leading-relaxed text-muted">{d}</span>
+                <span className="shrink-0 text-[11.5px] font-medium text-faint sm:ml-auto">
+                  {result}
+                </span>
               </div>
-              <span className="hidden font-mono text-[10.5px] text-faint sm:block">
-                exit 0, or it doesn't ship
-              </span>
-            </div>
-            {/* terminal body — the commands, and what they prove */}
-            <div className="term-body px-4 py-4 sm:px-5">
-              {PROOF.map(([cmd, out]) => (
-                <div key={cmd} className="flex flex-wrap items-baseline gap-x-2 py-0.5">
-                  <span className="select-none text-[#6e7681]">$</span>
-                  <span className="font-semibold text-[#e6edf3]">{cmd}</span>
-                  <span className="mx-1 hidden h-px min-w-4 flex-1 self-center border-b border-dashed border-[#21262d] sm:block" aria-hidden />
-                  <span className="text-[#3fb950]">{out}</span>
-                </div>
-              ))}
-              <div className="flex items-center gap-2 py-0.5">
-                <span className="select-none text-[#6e7681]">$</span>
-                <span className="caret inline-block h-3.5 w-[7px] bg-[#58a6ff]" aria-hidden />
-              </div>
-            </div>
+            ))}
           </div>
         </Reveal>
         <Reveal delay={140}>
-          <p className="mt-3.5 text-[12.5px] leading-relaxed text-muted">
+          <p className="mt-3.5 max-w-[72ch] text-[12.5px] leading-relaxed text-muted">
             {m ? (
               <>
                 the seed plants exactly {batch!.counts.incidents} breaks across six classes — the tests
@@ -354,7 +340,7 @@ function SectionHead({ kicker, title, note, compact }: {
         <h2 className={`font-semibold tracking-[-0.02em] ${compact ? "text-[16px]" : "text-[22px]"}`}>
           {title}
         </h2>
-        {note && <span className="font-mono text-[10.5px] text-faint">{note}</span>}
+        {note && <span className="text-[12px] text-faint">{note}</span>}
       </div>
     </div>
   );

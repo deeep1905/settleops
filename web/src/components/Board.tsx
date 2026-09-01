@@ -1,16 +1,14 @@
 import { useMemo, useState } from "react";
 import type { Batch, Incident } from "../types";
 import { classLabel, classTone, inr, sevTone, statusTone } from "../lib";
-
-const STATUSES = ["ALL", "OPEN", "PROPOSED", "PAGED", "RESOLVED", "TICKET"] as const;
-const CLASSES = ["ALL", "TIMING_GAP", "AMOUNT_DRIFT", "MISSING_ENTRY",
-  "DUPLICATE_CHARGE", "FEE_MISMATCH", "CURRENCY_MISMATCH"] as const;
+import { CountUp, Select } from "./ui";
+import type { Opt } from "./ui";
 
 export function Board({ batch, brain, onOpen }: {
   batch: Batch; brain: string; onOpen: (i: Incident) => void;
 }) {
-  const [status, setStatus] = useState<(typeof STATUSES)[number]>("ALL");
-  const [klass, setKlass] = useState<(typeof CLASSES)[number]>("ALL");
+  const [status, setStatus] = useState<string>("ALL");
+  const [klass, setKlass] = useState<string>("ALL");
 
   const rows = useMemo(() => batch.incidents.filter((i) =>
     (status === "ALL" || i.status === status) &&
@@ -18,14 +16,40 @@ export function Board({ batch, brain, onOpen }: {
 
   const m = batch.metrics;
 
+  /* live counts per option — the filters double as a summary */
+  const statusCounts = useMemo(() => {
+    const c: Record<string, number> = { ALL: batch.incidents.length };
+    for (const i of batch.incidents) c[i.status] = (c[i.status] ?? 0) + 1;
+    return c;
+  }, [batch]);
+  const classCounts = useMemo(() => {
+    const c: Record<string, number> = { ALL: batch.incidents.length };
+    for (const i of batch.incidents) c[i.break_class] = (c[i.break_class] ?? 0) + 1;
+    return c;
+  }, [batch]);
+
+  const statusOpts: Opt<string>[] = [
+    { value: "ALL", label: "all statuses", count: statusCounts.ALL },
+    ...(["OPEN", "PROPOSED", "PAGED", "RESOLVED", "TICKET"] as const)
+      .filter((s) => statusCounts[s])
+      .map((s) => ({ value: s, label: s.toLowerCase(), count: statusCounts[s] })),
+  ];
+  const classOpts: Opt<string>[] = [
+    { value: "ALL", label: "all classes", count: classCounts.ALL },
+    ...(["TIMING_GAP", "AMOUNT_DRIFT", "MISSING_ENTRY",
+      "DUPLICATE_CHARGE", "FEE_MISMATCH", "CURRENCY_MISMATCH"] as const)
+      .filter((c) => classCounts[c])
+      .map((c) => ({ value: c, label: classLabel[c] ?? c.toLowerCase(), count: classCounts[c] })),
+  ];
+
   return (
     <div>
       {/* ---------- hero strip ---------- */}
       <section className="card grid-bg mb-6 overflow-hidden">
         <div className="flex flex-wrap items-end justify-between gap-4 px-5 py-5 sm:px-6">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
-              batch {batch.batch_id} · seed {batch.seed} · brain: {brain}
+            <div className="kicker text-accent">
+              batch {batch.batch_id} · seed {batch.seed} · {brain} brain
             </div>
             <h1 className="mt-2 max-w-[34ch] text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[30px]">
               {batch.counts.matched} of {batch.counts.books} lines reconciled.
@@ -38,12 +62,13 @@ export function Board({ batch, brain, onOpen }: {
             </p>
           </div>
           <div className="text-right">
-            <div className="tabular text-[42px] font-semibold leading-none tracking-[-0.02em] text-ink">
-              {batch.match_rate}<span className="text-[20px] text-muted">%</span>
-            </div>
-            <div className="mt-1 text-[11px] font-medium uppercase tracking-[0.08em] text-faint">
-              match rate
-            </div>
+            <CountUp
+              value={batch.match_rate}
+              decimals={1}
+              suffix="%"
+              className="text-[42px] font-semibold leading-none tracking-[-0.02em] text-ink"
+            />
+            <div className="kicker mt-1.5 text-faint">match rate</div>
           </div>
         </div>
       </section>
@@ -59,10 +84,20 @@ export function Board({ batch, brain, onOpen }: {
       </div>
 
       {/* ---------- filters ---------- */}
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Filter label="status" options={STATUSES} value={status} onChange={setStatus} />
-        <Filter label="class" options={CLASSES} value={klass} onChange={setKlass} />
-        <span className="ml-auto text-[12px] text-faint tabular">{rows.length} shown</span>
+      <div className="mb-3 flex flex-wrap items-center gap-2.5">
+        <Select label="status" value={status} options={statusOpts} onChange={setStatus} />
+        <Select label="class" value={klass} options={classOpts} onChange={setKlass} />
+        {(status !== "ALL" || klass !== "ALL") && (
+          <button
+            onClick={() => { setStatus("ALL"); setKlass("ALL"); }}
+            className="rounded-md px-2 py-1 text-[11.5px] font-medium text-faint transition-colors hover:text-ink"
+          >
+            reset
+          </button>
+        )}
+        <span className="tabular ml-auto text-[12px] text-faint">
+          {rows.length} of {batch.incidents.length} shown
+        </span>
       </div>
 
       {/* ---------- incidents table ---------- */}
@@ -80,12 +115,14 @@ export function Board({ batch, brain, onOpen }: {
                 <th className="px-3 py-2.5 font-semibold">why</th>
               </tr>
             </thead>
-            <tbody>
-              {rows.map((i) => (
+            {/* keyed by the active filters so a new filter replays the stagger */}
+            <tbody key={`${status}:${klass}`}>
+              {rows.map((i, idx) => (
                 <tr
                   key={i.id}
                   onClick={() => onOpen(i)}
-                  className="cursor-pointer border-b border-line/70 transition-colors last:border-b-0 hover:bg-accent-soft/50"
+                  style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
+                  className="row-in cursor-pointer border-b border-line/70 transition-colors last:border-b-0 hover:bg-accent-soft/50"
                 >
                   <td className="px-4 py-2.5">
                     <span className={`chip ${sevTone(i.severity)}`}>{i.severity}</span>
@@ -130,29 +167,14 @@ function Kpi({ label, value, tone, hint }: {
     tone === "ok" ? "text-ok" : tone === "warn" ? "text-warn"
     : tone === "crit" ? "text-crit" : "text-ink";
   return (
-    <div className="card px-4 py-3">
-      <div className="text-[11px] font-medium uppercase tracking-[0.07em] text-faint">{label}</div>
-      <div className={`tabular mt-1 text-[24px] font-semibold leading-none ${color}`}>{value}</div>
+    <div className="card lift px-4 py-3">
+      <div className="kicker text-faint">{label}</div>
+      {typeof value === "number" ? (
+        <CountUp value={value} className={`mt-1 block text-[24px] font-semibold leading-none ${color}`} />
+      ) : (
+        <div className={`tabular mt-1 text-[24px] font-semibold leading-none ${color}`}>{value}</div>
+      )}
       {hint && <div className="mt-1 text-[10.5px] text-faint">{hint}</div>}
     </div>
-  );
-}
-
-function Filter<T extends string>({ label, options, value, onChange }: {
-  label: string; options: readonly T[]; value: T; onChange: (v: T) => void;
-}) {
-  return (
-    <label className="flex items-center gap-1.5 text-[12px] text-muted">
-      <span className="uppercase tracking-[0.05em] text-faint">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value as T)}
-        className="rounded-md border border-line bg-surface px-2 py-1 text-[12.5px] text-ink focus:border-accent focus:outline-none"
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>{o === "ALL" ? "all" : o}</option>
-        ))}
-      </select>
-    </label>
   );
 }

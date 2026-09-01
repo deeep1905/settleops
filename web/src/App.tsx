@@ -33,6 +33,9 @@ export default function App() {
 
   const openIncident = (i: Incident) => { setCurrent(i); setView("incident"); };
 
+  /* every navigation lands at the top, the way a real console does */
+  useEffect(() => { window.scrollTo(0, 0); }, [view, current]);
+
   const decide = async (id: string, decision: "approve" | "reject") => {
     const d = await postJSON<{ incident: Incident }>(`/api/incidents/${id}/decide`, { decision });
     setCurrent(d.incident);
@@ -94,38 +97,41 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:px-6">
-        {error && (
-          <div className="card mb-6 border-crit/30 bg-crit-soft px-4 py-3 text-[13px] text-crit">
-            Engine unreachable ({error}). Run <code className="font-mono">make run</code> and reload —
-            the console stands alone, the numbers arrive when the engine does.
-          </div>
-        )}
-        {!batch && !error && view !== "home" && (
-          <div className="card mb-6 px-4 py-10 text-center text-[13px] text-muted">
-            starting the engine…
-          </div>
-        )}
-        {view === "home" && (
-          <Landing
-            batch={batch}
-            brain={brain}
-            onOpen={() => setView("board")}
-            onHow={() => setView("how")}
-            onPm={() => setView("postmortem")}
-            onRun={rerun}
-            busy={restarting}
-          />
-        )}
-        {batch && view !== "home" && (
-          <>
-            {view === "board" && <Board batch={batch} brain={brain} onOpen={openIncident} />}
-            {view === "incident" && current && (
-              <IncidentDetail incident={current} onBack={() => setView("board")} onDecide={decide} />
-            )}
-            {view === "postmortem" && <Postmortem onOpen={openIncident} />}
-            {view === "how" && <HowItWorks />}
-          </>
-        )}
+        {/* views compose themselves on navigation; incidents re-compose per id */}
+        <div key={view === "incident" && current ? `incident-${current.id}` : view} className="view-in">
+          {error && (
+            <div className="card mb-6 border-crit/30 bg-crit-soft px-4 py-3 text-[13px] text-crit">
+              Engine unreachable ({error}). Run <code className="font-mono">make run</code> and reload —
+              the console stands alone, the numbers arrive when the engine does.
+            </div>
+          )}
+          {!batch && !error && view !== "home" && (
+            <div className="card mb-6 px-4 py-10 text-center text-[13px] text-muted">
+              starting the engine…
+            </div>
+          )}
+          {view === "home" && (
+            <Landing
+              batch={batch}
+              brain={brain}
+              onOpen={() => setView("board")}
+              onHow={() => setView("how")}
+              onPm={() => setView("postmortem")}
+              onRun={rerun}
+              busy={restarting}
+            />
+          )}
+          {batch && view !== "home" && (
+            <>
+              {view === "board" && <Board batch={batch} brain={brain} onOpen={openIncident} />}
+              {view === "incident" && current && (
+                <IncidentDetail incident={current} onBack={() => setView("board")} onDecide={decide} />
+              )}
+              {view === "postmortem" && <Postmortem onBoard={() => setView("board")} />}
+              {view === "how" && <HowItWorks />}
+            </>
+          )}
+        </div>
       </main>
 
       <footer className="border-t border-line bg-surface">
@@ -144,12 +150,12 @@ export default function App() {
               The incident console for your books — deterministic matching, bounded
               remediation, an audit trail born with every event.
             </p>
-            <div className="mt-4 flex items-center gap-2 font-mono text-[10.5px] text-faint">
-              <span className="live-dot" aria-hidden />
-              {batch
-                ? `batch ${batch.batch_id} · seed ${batch.seed} · brain: ${brain}`
-                : `brain: ${brain}`}
-            </div>
+            {batch && (
+              <div className="mt-4 text-[11.5px] text-faint">
+                batch <span className="font-medium text-muted">{batch.batch_id}</span> · seed{" "}
+                <span className="font-medium text-muted">{batch.seed}</span> · {brain} brain
+              </div>
+            )}
           </div>
 
           {/* console nav */}
@@ -202,7 +208,7 @@ export default function App() {
         <div className="border-t border-line">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-4 text-[12px] text-faint sm:px-6">
             <span>SettleOps · reconciliation as incident response</span>
-            <span className="font-mono">synthetic data · integer paise · deterministic seed</span>
+            <span>synthetic data · integer paise · deterministic seed</span>
             <span className="ml-auto">built for Razorpay AI Buildathon 2026 · Track 4</span>
           </div>
         </div>

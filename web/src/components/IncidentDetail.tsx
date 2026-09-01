@@ -70,15 +70,15 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
         ← back to the board
       </button>
 
-      <div className="card mb-5 px-5 py-4 sm:px-6">
+      <div className="card pop mb-5 px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-[13px] font-semibold text-accent">{i.id}</span>
-          <span className={`chip ${sevTone(i.severity)}`}>{i.severity}</span>
-          <span className={`chip ${classTone[i.break_class] ?? ""}`}>
+          <span className={`chip pop ${sevTone(i.severity)}`} key={i.severity}>{i.severity}</span>
+          <span className={`chip pop ${classTone[i.break_class] ?? ""}`} key={i.break_class}>
             {classLabel[i.break_class] ?? i.break_class}
           </span>
-          <span className={`chip ${statusTone(i.status)}`}>{i.status}</span>
-          <span className="ml-auto font-mono text-[17px] font-semibold tabular">
+          <span key={i.status} className={`chip pop ${statusTone(i.status)}`}>{i.status}</span>
+          <span className="tabular ml-auto font-mono text-[17px] font-semibold">
             {inr(i.amount_paise)}
           </span>
         </div>
@@ -96,9 +96,7 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
         <div className="space-y-5">
           {/* diagnosis */}
           <section className="card px-5 py-4">
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.07em] text-faint">
-              diagnosis
-            </h3>
+            <h3 className="kicker text-faint">diagnosis</h3>
             <p className="mt-2 text-[13.5px] leading-relaxed text-ink">
               {i.events.find((e) => e.kind === "DIAGNOSED" && e.actor === "engine")?.detail
                 ?? "—"}
@@ -114,8 +112,8 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
           {/* runbook */}
           <section className="card px-5 py-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.07em] text-faint">
-                runbook {i.runbook}
+              <h3 className="kicker text-faint">
+                runbook <span className="font-mono">{i.runbook}</span>
               </h3>
               <span className="text-[11.5px] text-faint">
                 {i.status === "RESOLVED" ? "closed" : pending ? "waiting on you" : "in progress"}
@@ -139,9 +137,7 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
 
           {/* proposed action + decision */}
           <section className={`card px-5 py-4 ${pending ? "border-warn/40" : ""}`}>
-            <h3 className="text-[11px] font-semibold uppercase tracking-[0.07em] text-faint">
-              proposed action
-            </h3>
+            <h3 className="kicker text-faint">proposed action</h3>
             {i.proposed_action ? (
               <>
                 <p className="mt-2 text-[13.5px] leading-relaxed text-ink">{i.proposed_action}</p>
@@ -149,13 +145,13 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => void onDecide(i.id, "approve")}
-                      className="rounded-md bg-ok px-4 py-2 text-[13px] font-semibold text-white transition-opacity hover:opacity-85"
+                      className="rounded-lg bg-ok px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(5,150,105,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(5,150,105,0.55)] disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       Approve &amp; close
                     </button>
                     <button
                       onClick={() => void onDecide(i.id, "reject")}
-                      className="rounded-md border border-line2 bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-colors hover:bg-crit-soft hover:text-crit"
+                      className="rounded-lg border border-line2 bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-crit/40 hover:bg-crit-soft hover:text-crit disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       Reject &amp; reopen
                     </button>
@@ -164,8 +160,8 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
                     </span>
                   </div>
                 ) : (
-                  <p className={`mt-2 text-[12.5px] ${i.action_state === "APPROVED" ? "text-ok" : i.action_state === "REJECTED" ? "text-crit" : "text-muted"}`}>
-                    {i.action_state === "APPROVED" && "approved by a human — incident closed"}
+                  <p key={`${i.action_state}-${i.status}`} className={`pop mt-2 text-[12.5px] font-medium ${i.action_state === "APPROVED" ? "text-ok" : i.action_state === "REJECTED" ? "text-crit" : "text-muted"}`}>
+                    {i.action_state === "APPROVED" && "✓ approved by a human — incident closed"}
                     {i.action_state === "REJECTED" && "rejected by a human — incident reopened"}
                     {i.action_state === "NONE" && "paged to the human desk — no auto-apply path"}
                   </p>
@@ -185,12 +181,10 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
 
         {/* right column: timeline */}
         <section className="card h-fit px-5 py-4">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.07em] text-faint">
-            timeline · {i.events.length} events
-          </h3>
+          <h3 className="kicker text-faint">timeline · {i.events.length} events</h3>
           <ol className="mt-4 space-y-4">
             {i.events.map((e, idx) => (
-              <li key={idx} className="relative pl-5">
+              <li key={idx} style={{ animationDelay: `${Math.min(idx, 10) * 45}ms` }} className="row-in relative pl-5">
                 {idx < i.events.length - 1 && (
                   <span className="absolute left-[5px] top-4 h-full w-px bg-line" aria-hidden />
                 )}

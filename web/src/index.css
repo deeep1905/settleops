@@ -37,11 +37,10 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* the kicker — the console's signature mono micro-label              */
-/* ("the batch, in motion" — this voice, everywhere a label appears)  */
+/* the kicker — a small tracked label in the text face; mono is       */
+/* reserved for machine strings (ids, commands, code, amounts)        */
 /* ------------------------------------------------------------------ */
 .kicker {
-  font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -89,7 +88,7 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* motion inventory — entrance, scroll-reveal, terminal caret         */
+/* motion inventory — entrance, scroll-reveal, view + list, menus     */
 /* ------------------------------------------------------------------ */
 @keyframes rise {
   from { opacity: 0; transform: translateY(14px); }
@@ -106,6 +105,39 @@ body {
   animation: pop 0.3s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
 }
 
+/* a view composes itself on every navigation */
+@keyframes view-in {
+  from { opacity: 0; transform: translateY(10px); }
+}
+.view-in {
+  animation: view-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+/* list rows stagger in — tables, timelines, boards */
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(5px); }
+}
+.row-in {
+  animation: row-in 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+/* filter menu / popover spring */
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.985); }
+}
+.menu-in {
+  animation: menu-in 0.16s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+/* distribution bars grow from zero on mount */
+@keyframes bar-grow {
+  from { width: 0; }
+}
+.bar {
+  width: var(--w);
+  animation: bar-grow 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
 /* scroll-reveal: sections compose themselves as they enter the viewport */
 .reveal {
   opacity: 0;
@@ -118,37 +150,6 @@ body {
 .reveal.in {
   opacity: 1;
   transform: none;
-}
-
-/* terminal caret — the machine is mid-thought */
-@keyframes blink {
-  50% { opacity: 0; }
-}
-.caret {
-  animation: blink 1.1s steps(1) infinite;
-}
-
-/* live dot — a ring, not just a pulse */
-.live-dot {
-  position: relative;
-  display: inline-flex;
-  width: 7px;
-  height: 7px;
-  border-radius: 9999px;
-  background: var(--color-ok);
-}
-.live-dot::after {
-  content: "";
-  position: absolute;
-  inset: -3.5px;
-  border-radius: 9999px;
-  border: 1.5px solid var(--color-ok);
-  opacity: 0.55;
-  animation: live-ring 2.2s ease-out infinite;
-}
-@keyframes live-ring {
-  0% { transform: scale(0.5); opacity: 0.75; }
-  70%, 100% { transform: scale(1.6); opacity: 0; }
 }
 
 /* ------------------------------------------------------------------ */
@@ -172,28 +173,18 @@ body {
   border-radius: 6px;
 }
 
-/* terminal window body */
-.term-body {
-  background: #0d1117;
-  color: #d7dde4;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.75;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .pop,
-  .reveal {
+  .reveal,
+  .view-in,
+  .row-in,
+  .menu-in,
+  .bar {
     animation: none;
     transition: none;
     opacity: 1;
     transform: none;
-  }
-  .caret,
-  .live-dot::after {
-    animation: none;
-    opacity: 0;
   }
   html { scroll-behavior: auto; }
 }

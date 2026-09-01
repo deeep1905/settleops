@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import type { Incident, Metrics } from "../types";
+import type { Metrics } from "../types";
 import { getJSON } from "../lib";
+import { CountUp, Bar } from "./ui";
 
 interface PostmortemData {
   markdown: string;
   metrics: Metrics;
 }
 
-export function Postmortem({ onOpen }: { onOpen: (i: Incident) => void }) {
+export function Postmortem({ onBoard }: { onBoard: () => void }) {
   const [data, setData] = useState<PostmortemData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,53 +22,120 @@ export function Postmortem({ onOpen }: { onOpen: (i: Incident) => void }) {
   if (!data) return <div className="card px-4 py-10 text-center text-[13px] text-muted">loading postmortem…</div>;
 
   const m = data.metrics;
+  const total = Math.max(1, m.incidents_total);
 
   return (
-    <div className="max-w-3xl">
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
-        the SRE artifact
-      </div>
-      <h1 className="mb-2 text-[28px] font-semibold tracking-[-0.02em]">Postmortem</h1>
-      <p className="mb-6 max-w-[62ch] text-[13.5px] leading-relaxed text-muted">
-        What happened, what the engine did, what it could not fix and why. The honest list is the
-        point: an incident console that hides its unresolved pile is lying to you.
-      </p>
+    <div>
+      {/* ---------- hero band ---------- */}
+      <section className="card grid-bg mb-6 overflow-hidden">
+        <div className="flex flex-wrap items-end justify-between gap-4 px-5 py-5 sm:px-6">
+          <div>
+            <div className="kicker text-accent">the sre artifact</div>
+            <h1 className="mt-2 text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[30px]">
+              Postmortem
+            </h1>
+            <p className="mt-2 max-w-[60ch] text-[13.5px] leading-relaxed text-muted">
+              What happened, what the engine did, what it could not fix and why. The honest
+              list is the point: an incident console that hides its unresolved pile is
+              lying to you.
+            </p>
+          </div>
+          <div className="text-right">
+            <CountUp
+              value={m.match_rate}
+              decimals={1}
+              suffix="%"
+              className="text-[42px] font-semibold leading-none tracking-[-0.02em] text-ink"
+            />
+            <div className="kicker mt-1.5 text-faint">match rate</div>
+          </div>
+        </div>
+      </section>
 
-      {/* stat grid */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="match rate" value={`${m.match_rate}%`} tone="ok" />
-        <Stat label="incidents" value={m.incidents_total} />
-        <Stat label="auto-resolved" value={m.auto_resolved} tone="ok" hint="bounded" />
-        <Stat label="awaiting human" value={m.awaiting_human} tone="warn" />
-      </div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
+        {/* ---------- left: the report ---------- */}
+        <div className="card divide-y divide-line">
+          {data.markdown
+            .split("\n\n")
+            .filter(Boolean)
+            .map(renderBlock)}
+        </div>
 
-      {/* the markdown, rendered as light structure */}
-      <div className="card divide-y divide-line">
-        {data.markdown
-          .split("\n\n")
-          .filter(Boolean)
-          .map(renderBlock)}
-      </div>
+        {/* ---------- right: the numbers, at a glance ---------- */}
+        <aside className="space-y-4 lg:sticky lg:top-20">
+          <div className="grid grid-cols-2 gap-3">
+            <Stat label="incidents" value={m.incidents_total} />
+            <Stat label="auto-resolved" value={m.auto_resolved} tone="ok" hint="bounded by S3" />
+            <Stat label="awaiting human" value={m.awaiting_human} tone="warn" />
+            <Stat label="paged" value={m.paged} tone="crit" />
+          </div>
 
-      <p className="mt-4 text-[11.5px] text-faint">
-        tip: every incident id above is live on the{" "}
-        <button className="text-accent underline" onClick={() => onOpen({} as Incident)}>
-          board
-        </button>{" "}
-        — regenerate with <span className="font-mono">make report</span>
-      </p>
+          <div className="card px-4 py-4">
+            <div className="kicker text-faint">severity mix</div>
+            <div className="mt-3 space-y-2.5">
+              {([
+                ["SEV-1", m.sev1, "bg-crit", "text-crit"],
+                ["SEV-2", m.sev2, "bg-warn", "text-warn"],
+                ["SEV-3", m.sev3, "bg-info", "text-info"],
+              ] as [string, number, string, string][]).map(([sev, n, bar, label], i) => (
+                <div key={sev} className="flex items-center gap-3">
+                  <span className={`w-12 text-[11px] font-semibold ${label}`}>{sev}</span>
+                  <Bar pct={(n / total) * 100} className={bar} delay={150 + i * 90} />
+                  <span className="tabular ml-auto text-[12px] font-semibold text-ink">{n}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="card px-4 py-4">
+            <div className="kicker text-faint">where it stands</div>
+            <div className="mt-3 space-y-2.5">
+              {([
+                ["auto-resolved", m.auto_resolved, "bg-ok"],
+                ["awaiting human", m.awaiting_human, "bg-warn"],
+                ["open / scheduled", m.open_or_scheduled, "bg-accent"],
+                ["paged", m.paged, "bg-crit"],
+              ] as [string, number, string][]).map(([l, n, color], i) => (
+                <div key={l} className="flex items-center gap-3">
+                  <span className="w-[6.5rem] text-[12px] text-muted">{l}</span>
+                  <Bar pct={(n / total) * 100} className={color} delay={200 + i * 80} />
+                  <span className="tabular ml-auto text-[12px] font-semibold text-ink">{n}</span>
+                </div>
+              ))}
+            </div>
+            {m.mttr_hours_auto != null && (
+              <p className="mt-3 border-t border-line pt-3 text-[12px] text-muted">
+                mean time to resolve (auto):{" "}
+                <span className="tabular font-semibold text-ink">{m.mttr_hours_auto}h</span>
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={onBoard}
+            className="w-full rounded-lg bg-ink px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
+          >
+            Work the board →
+          </button>
+
+          <p className="px-1 text-[11.5px] leading-relaxed text-faint">
+            regenerated by <span className="font-mono">make report</span> — numbers enter
+            the repo only through regeneration
+          </p>
+        </aside>
+      </div>
     </div>
   );
 }
 
 function Stat({ label, value, tone, hint }: {
-  label: string; value: string | number; tone?: "ok" | "warn"; hint?: string;
+  label: string; value: number; tone?: "ok" | "warn" | "crit"; hint?: string;
 }) {
-  const color = tone === "ok" ? "text-ok" : tone === "warn" ? "text-warn" : "text-ink";
+  const color = tone === "ok" ? "text-ok" : tone === "warn" ? "text-warn" : tone === "crit" ? "text-crit" : "text-ink";
   return (
-    <div className="card px-4 py-3">
-      <div className="text-[11px] font-medium uppercase tracking-[0.07em] text-faint">{label}</div>
-      <div className={`tabular mt-1 text-[22px] font-semibold leading-none ${color}`}>{value}</div>
+    <div className="card lift px-4 py-3">
+      <div className="kicker text-faint">{label}</div>
+      <CountUp value={value} className={`mt-1 block text-[22px] font-semibold leading-none ${color}`} />
       {hint && <div className="mt-1 text-[10.5px] text-faint">{hint}</div>}
     </div>
   );
@@ -76,7 +144,7 @@ function Stat({ label, value, tone, hint }: {
 function renderBlock(block: string, idx: number) {
   if (block.startsWith("# ")) {
     return (
-      <h2 key={idx} className="px-5 py-3.5 text-[17px] font-semibold">{block.slice(2)}</h2>
+      <h2 key={idx} className="px-5 py-3.5 text-[17px] font-semibold tracking-[-0.01em]">{block.slice(2)}</h2>
     );
   }
   if (block.startsWith("*") && block.endsWith("*")) {
@@ -98,9 +166,9 @@ function renderBlock(block: string, idx: number) {
           </thead>
           <tbody>
             {body.map((r, i) => (
-              <tr key={i} className="border-t border-line/70">
+              <tr key={i} className="border-t border-line/70 odd:bg-paper/45">
                 {r.map((c, j) => (
-                  <td key={j} className={`py-1.5 pr-4 ${j === 0 ? "font-mono text-[11.5px]" : "text-muted"}`}>
+                  <td key={j} className={`py-2 pr-4 ${j === 0 ? "font-mono text-[11.5px] font-medium text-accent" : "text-muted"}`}>
                     {cleanEmphasis(c)}
                   </td>
                 ))}

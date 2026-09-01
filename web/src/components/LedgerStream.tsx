@@ -459,11 +459,10 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       aria-label="live batch visualization"
     >
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <span className="live-dot" aria-hidden />
-          <span className="kicker text-muted">the batch, in motion</span>
-        </div>
-        <span className="truncate font-mono text-[11px] text-faint">
+        <span className="truncate text-[12.5px] font-semibold tracking-[-0.01em] text-ink">
+          The batch, in motion
+        </span>
+        <span className="shrink-0 font-mono text-[11px] text-faint">
           {batch ? `${batch.batch_id} · seed ${batch.seed}` : "booting"}
         </span>
       </div>
@@ -485,7 +484,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
           <div className="tabular mt-0.5 font-mono text-[20px] font-semibold leading-none text-ink">
             {batch ? `${batch.match_rate}%` : "—"}
           </div>
-          <div className="mt-1.5 font-mono text-[10px] text-faint">
+          <div className="tabular mt-1.5 text-[10px] text-faint">
             {batch ? `${batch.counts.matched} of ${batch.counts.books} rows` : "—"}
           </div>
         </div>
@@ -521,9 +520,9 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
-        <span className="truncate font-mono text-[10.5px] text-faint">
+        <span className="truncate text-[11.5px] text-faint">
           {batch ? `books ${batch.counts.books} · rail ${batch.counts.settlements} · ` : ""}
-          brain: {brain} · replayed from the ledger
+          {brain} brain · replayed from the ledger
         </span>
         <button
           onClick={onRun}
