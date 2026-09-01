@@ -132,7 +132,13 @@ export default function App() {
                 <IncidentDetail incident={current} onBack={() => setView("board")} onDecide={decide} />
               )}
               {view === "postmortem" && <Postmortem onBoard={() => setView("board")} />}
-              {view === "how" && <HowItWorks />}
+              {view === "how" && (
+                <HowItWorks
+                  batch={batch}
+                  onOpen={() => setView("board")}
+                  onPm={() => setView("postmortem")}
+                />
+              )}
             </>
           )}
         </div>

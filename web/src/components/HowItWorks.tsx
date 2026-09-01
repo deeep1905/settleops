@@ -1,4 +1,21 @@
-import type { ReactNode } from "react";
+import { Fragment, useState } from "react";
+import type { Batch } from "../types";
+import { inr } from "../lib";
+import { CountUp, Reveal } from "./ui";
+
+const REPO = "https://github.com/deeep1905/settleops";
+const TESTS = `${REPO}/blob/main/tests/test_engine.py`;
+
+/**
+ * HowItWorks.tsx — the loop, spelled out: six steps end to end, then the
+ * five stopping rules that bound step 04. The page speaks the same grammar
+ * as the rest of the console (hero band, hairline spec tables, reveal on
+ * scroll) and uses the full console width — a docs page, not a pamphlet.
+ *
+ * The rules table carries two things prose never could: a live "this
+ * batch" column (what each rule actually did to R42) and the verbatim
+ * test excerpt behind each row — click a rule, read the assertion.
+ */
 
 const STEPS = [
   {
@@ -39,70 +56,383 @@ const STEPS = [
   },
 ];
 
-export function HowItWorks() {
+/* the five stopping rules — each carries the verbatim test excerpt that
+   enforces it (from tests/test_engine.py) and the line it lives on */
+interface Rule {
+  id: string;
+  rule: string;
+  qualifier: string;
+  why: string;
+  test: string;
+  line: number;
+  code: string;
+}
+
+const RULES: Rule[] = [
+  {
+    id: "S1",
+    rule: "≥ ₹50,000 pages a human",
+    qualifier: "no silent large-value auto-actions, any break class",
+    why: "a large silent write is the one you can't take back",
+    test: "test_big_money_forced_to_human",
+    line: 137,
+    code: `def test_big_money_forced_to_human(self):
+    b = BooksRecord("B1", "ord_1", "2026-08-20", 90_000_00)  # ₹90,000
+    s = SettlementRecord("S1", "UTR1", "ord_1", "2026-08-21", 0,
+                         fee_paise=0, gross_amount_paise=90_000_00)
+    d = diagnose(Break("AMOUNT_DRIFT", "ord_1", b, [s]))
+    assert d.over_threshold is True
+    assert d.severity in ("SEV-2", "SEV-1")`,
+  },
+  {
+    id: "S2",
+    rule: "currency mismatch never auto-acts",
+    qualifier: "any FX risk, any amount",
+    why: "wrong-FX write-backs are unrecoverable",
+    test: "test_currency_never_auto_acted",
+    line: 193,
+    code: `def test_currency_never_auto_acted(self):
+    report = run_batch(seed=42)
+    cur = [i for i in report.incidents
+           if i.break_class == "CURRENCY_MISMATCH"]
+    assert len(cur) == 1
+    assert cur[0].status == "PAGED" and cur[0].severity == "SEV-1"
+    assert cur[0].resolved_at is None`,
+  },
+  {
+    id: "S3",
+    rule: "max 5 auto-resolutions per batch",
+    qualifier: "the budget resets per batch",
+    why: "runaway automation stops itself; the rest escalate",
+    test: "test_auto_budget_respected",
+    line: 207,
+    code: `def test_auto_budget_respected(self):
+    report = run_batch(seed=42)
+    autos = [i for i in report.incidents
+             if i.resolve_reason.startswith("auto")]
+    assert len(autos) <= MAX_AUTO_PER_BATCH
+    assert 1 <= len(autos)   # and the budget actually gets used`,
+  },
+  {
+    id: "S4",
+    rule: "one automated action per incident",
+    qualifier: "across the incident's whole life",
+    why: "a rejected proposal is never re-proposed by a machine",
+    test: "test_s4_one_automated_action_per_incident",
+    line: 214,
+    code: `def test_s4_one_automated_action_per_incident(self):
+    report = run_batch(seed=42)
+    for i in report.incidents:
+        autos = [e for e in i.events if e.kind == "AUTO_RESOLVED"]
+        assert len(autos) <= 1, f"{i.id} has {len(autos)} automated actions"`,
+  },
+  {
+    id: "S5",
+    rule: "proposals only, never silent writes",
+    qualifier: "every class, every amount",
+    why: "no journal adjustment lands without an approval event",
+    test: "test_proposals_need_approval_state",
+    line: 234,
+    code: `def test_proposals_need_approval_state(self):
+    report = run_batch(seed=42)
+    for i in report.incidents:
+        if i.proposed_action:
+            assert i.action_state in ("PENDING_APPROVAL",
+                                      "APPROVED", "REJECTED")`,
+  },
+];
+
+/* the human desk's threshold, mirrored from settleops/taxonomy.py */
+const HUMAN_DESK_PAISE = 5_000_000;
+
+export function HowItWorks({ batch, onOpen, onPm }: {
+  batch: Batch | null;
+  onOpen: () => void;
+  onPm: () => void;
+}) {
+  const [openRule, setOpenRule] = useState<string | null>(null);
+
+  /* live evidence — what each rule actually did to this batch */
+  const inc = batch?.incidents ?? [];
+  const m = batch?.metrics;
+  const events = inc.reduce((n, i) => n + i.events.length, 0);
+  const largest = inc.length ? Math.max(...inc.map((i) => i.amount_paise)) : 0;
+  const bigCount = inc.filter((i) => i.amount_paise >= HUMAN_DESK_PAISE).length;
+  const fx = inc.filter((i) => i.break_class === "CURRENCY_MISMATCH");
+  const repeats = inc.filter(
+    (i) => i.events.filter((e) => e.kind === "AUTO_RESOLVED").length > 1,
+  ).length;
+  const proposals = inc.filter((i) => i.proposed_action);
+
+  const evidence = (id: string): { num: string; label: string; tone?: string } => {
+    switch (id) {
+      case "S1":
+        return bigCount > 0
+          ? { num: String(bigCount), label: "breaks ≥ ₹50k · every one paged" }
+          : { num: inr(largest), label: "largest break · gate not crossed" };
+      case "S2":
+        return {
+          num: String(fx.length),
+          label: fx.length
+            ? `FX break · ${fx[0].severity} · ${fx[0].resolved_at ? "human-closed" : "paged, unresolved"}`
+            : "no FX break this batch",
+          tone: "text-crit",
+        };
+      case "S3":
+        return { num: `${m?.auto_resolved ?? 0}/5`, label: "of the auto-resolution budget" };
+      case "S4":
+        return { num: String(repeats), label: `repeat auto-actions · ${inc.length} timelines` };
+      default:
+        return { num: String(proposals.length), label: "proposals · all approval-gated" };
+    }
+  };
+
+  const toggle = (id: string) => setOpenRule((o) => (o === id ? null : id));
+
   return (
-    <div className="max-w-4xl">
-      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
-        the loop
-      </div>
-      <h1 className="mb-3 text-[28px] font-semibold tracking-[-0.02em]">
-        Reconciliation, run like incident response
-      </h1>
-      <p className="mb-8 max-w-[64ch] text-[13.5px] leading-relaxed text-muted">
-        Every ops team has an SRE: someone who watches the system, diagnoses what broke, follows
-        a bounded runbook, and pages a human when the automation shouldn't decide. Finance teams
-        close books by hand. SettleOps gives finance the SRE treatment — six steps, all
-        deterministic, all auditable.
-      </p>
+    <div>
+      {/* ---------- hero band — the same grammar as the board ---------- */}
+      <section className="card grid-bg mb-8 overflow-hidden">
+        <div className="flex flex-wrap items-end justify-between gap-4 px-5 py-5 sm:px-6">
+          <div>
+            <div className="kicker text-accent">the loop</div>
+            <h1 className="mt-2 max-w-[28ch] text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[30px]">
+              Reconciliation, run like incident response
+            </h1>
+            <p className="mt-2 max-w-[64ch] text-[13.5px] leading-relaxed text-muted">
+              Every ops team has an SRE: someone who watches the system, diagnoses what broke,
+              follows a bounded runbook, and pages a human when the automation shouldn't decide.
+              Finance teams close books by hand. SettleOps gives finance the SRE treatment — six
+              steps, all deterministic, all auditable.
+            </p>
+          </div>
+          <div className="text-right">
+            <CountUp
+              value={events}
+              className="text-[42px] font-semibold leading-none tracking-[-0.02em] text-ink"
+            />
+            <div className="kicker mt-1.5 text-faint">audit-log events · append-only</div>
+          </div>
+        </div>
+      </section>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        {STEPS.map((s) => (
-          <section key={s.n} className="card px-5 py-4">
-            <div className="flex items-baseline justify-between">
-              <h3 className="text-[15px] font-semibold">{s.t}</h3>
-              <span className="font-mono text-[11px] text-faint">{s.n}</span>
+      {/* ---------- the six steps, full console width ---------- */}
+      <section className="mb-8">
+        <Reveal>
+          <div className="mb-4">
+            <div className="kicker text-accent">step by step</div>
+            <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 className="text-[22px] font-semibold tracking-[-0.02em]">Six steps, one code path</h2>
+              <span className="text-[12px] text-faint">
+                the same engine runs the console, the tests and{" "}
+                <span className="font-mono">make report</span>
+              </span>
             </div>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-muted">{s.d}</p>
-            <div className="mt-3 rounded-md bg-paper px-2.5 py-1.5 font-mono text-[11.5px] text-ink">
-              {s.code}
-            </div>
-          </section>
-        ))}
-      </div>
+          </div>
+        </Reveal>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <Reveal key={s.n} delay={i * 60} className="h-full">
+              <div className="card lift group flex h-full flex-col px-5 py-4">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="font-mono text-[11px] font-semibold text-accent">{s.n}</span>
+                  <code className="rounded-[5px] bg-accent-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                    {s.code}
+                  </code>
+                </div>
+                <h3 className="mt-3 text-[14.5px] font-semibold">{s.t}</h3>
+                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{s.d}</p>
+                {/* steps 05 and 06 point at the console artifacts they produce */}
+                <div className="mt-auto pt-3.5">
+                  {s.n === "05" && (
+                    <StepLink label="watch one get decided →" onClick={onOpen} />
+                  )}
+                  {s.n === "06" && (
+                    <StepLink label="read this batch's →" onClick={onPm} />
+                  )}
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
 
-      <StoppingRules />
+      {/* ---------- the five stopping rules: the schedule ---------- */}
+      <section className="mb-8">
+        <Reveal>
+          <div className="mb-4">
+            <div className="kicker text-accent">bounded by construction</div>
+            <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 className="text-[22px] font-semibold tracking-[-0.02em]">The five stopping rules</h2>
+              <a
+                href={TESTS}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[12px] text-faint transition-colors hover:text-ink"
+              >
+                each rule has a dedicated test —{" "}
+                <span className="font-mono">tests/test_engine.py</span> ↗
+              </a>
+            </div>
+          </div>
+        </Reveal>
+        <Reveal delay={80}>
+          <div className="card overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[880px] text-left">
+                <thead>
+                  <tr className="border-b border-line bg-paper/60">
+                    <th className="kicker px-5 py-2.5 pr-4 font-semibold text-faint">rule</th>
+                    <th className="kicker px-3 py-2.5 font-semibold text-faint">the condition</th>
+                    <th className="kicker px-3 py-2.5 font-semibold text-faint">
+                      this batch{batch ? ` · ${batch.batch_id}` : ""}
+                    </th>
+                    <th className="kicker px-5 py-2.5 text-right font-semibold text-faint">enforced by</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {RULES.map((r, idx) => {
+                    const ev = evidence(r.id);
+                    const isOpen = openRule === r.id;
+                    return (
+                      <Fragment key={r.id}>
+                        <tr
+                          style={{ animationDelay: `${idx * 45}ms` }}
+                          onClick={() => toggle(r.id)}
+                          className={`row-in cursor-pointer border-b border-line/70 transition-colors hover:bg-paper/50 ${
+                            isOpen ? "bg-paper/50" : ""
+                          }`}
+                        >
+                          <td className="px-5 py-4 pr-4 font-mono text-[12px] font-semibold text-ink">
+                            {r.id}
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className="text-[13px] font-medium text-ink">{r.rule}</div>
+                            <div className="mt-0.5 text-[12px] text-muted">{r.qualifier}</div>
+                          </td>
+                          <td className="px-3 py-4">
+                            <div className={`tabular font-mono text-[13px] font-semibold ${ev.tone ?? "text-ink"}`}>
+                              {ev.num}
+                            </div>
+                            <div className="mt-0.5 text-[11px] text-faint">{ev.label}</div>
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center justify-end">
+                              <button
+                                type="button"
+                                aria-expanded={isOpen}
+                                title={isOpen ? "hide the test" : "read the test"}
+                                onClick={(e) => { e.stopPropagation(); toggle(r.id); }}
+                                className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors hover:bg-accent-soft"
+                              >
+                                <span className="font-mono text-[11px] font-medium text-accent">
+                                  {r.test}()
+                                </span>
+                                <svg
+                                  width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden
+                                  className={`shrink-0 text-faint transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                                >
+                                  <path d="M3.5 6l4.5 4.5L12.5 6" stroke="currentColor" strokeWidth="1.8"
+                                    strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="mt-0.5 text-right text-[10.5px] text-faint">
+                              <a
+                                href={`${TESTS}#L${r.line}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="transition-colors hover:text-ink hover:underline"
+                              >
+                                tests/test_engine.py:{r.line} ↗
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                        {isOpen && (
+                          <tr className="row-in">
+                            <td colSpan={4} className="bg-paper/50 px-5 pb-5 sm:px-6 lg:px-10">
+                              <div className="card overflow-hidden">
+                                <pre className="overflow-x-auto px-4 py-3.5 font-mono text-[11.5px] leading-[1.7] text-ink">
+                                  {r.code}
+                                </pre>
+                                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line/60 px-4 py-2.5">
+                                  <span className="text-[11px] text-faint">
+                                    verbatim excerpt — the assertion that fails the build if this rule goes soft
+                                  </span>
+                                  <span className="text-[11.5px] text-muted">
+                                    why: <span className="text-ink">{r.why}</span>
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="border-t border-line px-5 py-3.5 text-[12.5px] leading-relaxed text-muted">
+              Click any row — the assertion is the rule. The suite (68 tests) runs on every push,
+              and the batch file regenerates bit-for-bit in CI or the build fails:{" "}
+              <span className="font-medium text-ink">enforced by the suite, not by prose.</span>
+            </p>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ---------- where you come in — the night desk ---------- */}
+      <Reveal>
+        <section className="grid-bg-dark relative overflow-hidden rounded-xl border border-[#0d1017] bg-[#0d1017] px-6 py-8 text-white sm:px-9">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="max-w-[52ch]">
+              <div className="kicker text-white/50">where you come in</div>
+              <h2 className="mt-2.5 text-balance text-[22px] font-semibold leading-[1.15] tracking-[-0.02em]">
+                Five of the six steps run themselves. Step 05 is yours.
+              </h2>
+              <p className="mt-2.5 text-[13px] leading-relaxed text-white/70">
+                {m
+                  ? `${m.awaiting_human} incidents are waiting on a human decision right now — `
+                  : "The desk is a click away — "}
+                approve a proposed adjustment, reject one, or let the SEV-1 sit.
+                Every decision lands in the append-only log the moment you make it.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+              <button
+                onClick={onOpen}
+                className="rounded-lg bg-white px-5 py-2.5 text-[13.5px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
+              >
+                Open the board →
+              </button>
+              <button
+                onClick={onPm}
+                className="rounded-lg border border-white/25 px-4.5 py-2.5 text-[13.5px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
+              >
+                Read the postmortem
+              </button>
+            </div>
+          </div>
+        </section>
+      </Reveal>
     </div>
   );
 }
 
-function StoppingRules() {
-  const rules: [string, string, ReactNode][] = [
-    ["S1", "≥ ₹50,000 pages a human", "no silent large-value auto-actions, any break class"],
-    ["S2", "currency mismatch never auto-acts", "wrong-FX write-backs are unrecoverable; always SEV-1"],
-    ["S3", "max 5 auto-resolutions per batch", "runaway automation stops itself; the rest escalate"],
-    ["S4", "one automated action per incident", "and a rejected proposal is never re-proposed by a machine"],
-    ["S5", "proposals only, never silent writes", "no journal adjustment lands without an approval event"],
-  ];
+/* a quiet link at the foot of a step card — docs pointing at the product */
+function StepLink({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <section className="card mt-6 px-5 py-4">
-      <h3 className="text-[11px] font-semibold uppercase tracking-[0.07em] text-faint">
-        the five stopping rules — what makes it bounded
-      </h3>
-      <table className="mt-3 w-full text-left text-[13px]">
-        <tbody>
-          {rules.map(([id, rule, why]) => (
-            <tr key={id} className="border-b border-line/70 last:border-b-0">
-              <td className="w-16 py-2.5 font-mono text-[12px] font-semibold text-crit">{id}</td>
-              <td className="py-2.5 pr-4 font-medium text-ink">{rule}</td>
-              <td className="py-2.5 text-muted">{why}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="mt-3 text-[11.5px] text-faint">
-        each rule has a dedicated test in <span className="font-mono">tests/test_engine.py</span> —
-        they are enforced by the suite, not by prose
-      </p>
-    </section>
+    <div className="border-t border-line/60 pt-3">
+      <button
+        type="button"
+        onClick={onClick}
+        className="text-[12px] font-medium text-accent transition-colors hover:text-ink hover:underline"
+      >
+        {label}
+      </button>
+    </div>
   );
 }

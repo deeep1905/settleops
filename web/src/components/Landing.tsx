@@ -1,8 +1,7 @@
-import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import type { Batch } from "../types";
 import { StreamCard } from "./LedgerStream";
-import { CountUp, CopyChip } from "./ui";
+import { CountUp, CopyChip, Reveal } from "./ui";
 
 /**
  * Landing.tsx — the overview: what this is, what it does, where the proof
@@ -450,42 +449,4 @@ function SectionHead({ kicker, title, note, compact }: {
 }
 
 /* ------------------------------ scroll reveal ------------------------------ */
-
-/**
- * Reveal — sections compose themselves as they enter the viewport.
- * One observer per element, disconnected on first hit; reduced-motion
- * and no-JS both degrade to visible content.
- */
-function Reveal({ children, className = "", delay = 0 }: {
-  children: ReactNode; className?: string; delay?: number;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      el.classList.add("in");
-      return;
-    }
-    const io = new IntersectionObserver(
-      (es) => {
-        if (es.some((e) => e.isIntersecting)) {
-          el.classList.add("in");
-          io.disconnect();
-        }
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -32px 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return (
-    <div
-      ref={ref}
-      className={`reveal ${className}`}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
-    >
-      {children}
-    </div>
-  );
-}
+/* Reveal lives in ui.tsx — shared with the how-it-works view. */

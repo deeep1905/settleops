@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent, ReactNode } from "react";
 
 /**
  * ui.tsx — shared primitives, zero new dependencies:
  *   CountUp — numbers that arrive, eased, tabular, reduced-motion aware
  *   Select  — a real filter menu (listbox semantics, keyboard, counts)
+ *   Reveal  — sections compose themselves as they enter the viewport
  */
 
 /* ------------------------------------------------------------------ */
@@ -258,6 +259,46 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
         <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
       </svg>
     </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Reveal — sections compose themselves as they enter the viewport.    */
+/* One observer per element, disconnected on first hit; reduced-motion */
+/* and no-JS both degrade to visible content.                          */
+/* ------------------------------------------------------------------ */
+
+export function Reveal({ children, className = "", delay = 0 }: {
+  children: ReactNode; className?: string; delay?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.classList.add("in");
+      return;
+    }
+    const io = new IntersectionObserver(
+      (es) => {
+        if (es.some((e) => e.isIntersecting)) {
+          el.classList.add("in");
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -32px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={`reveal ${className}`}
+      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+    >
+      {children}
+    </div>
   );
 }
 
