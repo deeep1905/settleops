@@ -1,4 +1,5 @@
 import type { Batch } from "../types";
+import { StreamCard } from "./LedgerStream";
 
 /**
  * Landing.tsx — the overview: what this is, what it does, where the proof
@@ -57,15 +58,15 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
   return (
     <div>
       {/* ------------------------------ hero ------------------------------ */}
-      <section className="grid-bg card mb-8 grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10">
+      <section className="grid-bg card mb-8 grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:gap-10">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
+          <div className="rise text-[11px] font-semibold uppercase tracking-[0.08em] text-accent">
             razorpay ai buildathon 2026 · track 4 · ai finance controller
           </div>
-          <h1 className="mt-4 max-w-[16ch] text-balance text-[clamp(30px,5vw,44px)] font-semibold leading-[1.08] tracking-[-0.025em]">
+          <h1 style={{ animationDelay: "70ms" }} className="rise mt-4 max-w-[16ch] text-balance text-[clamp(30px,5vw,44px)] font-semibold leading-[1.08] tracking-[-0.025em]">
             Reconciliation is the SRE problem nobody gave an SRE.
           </h1>
-          <p className="mt-5 max-w-[56ch] text-[14.5px] leading-relaxed text-muted">
+          <p style={{ animationDelay: "140ms" }} className="rise mt-5 max-w-[56ch] text-[14.5px] leading-relaxed text-muted">
             Finance teams close books by hand: eyeball the settlement file against the
             ledger, chase the differences in a spreadsheet, hope nothing slips. Ops teams
             solved this shape years ago. <span className="font-medium text-ink">SettleOps</span>{" "}
@@ -73,7 +74,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
             diagnose every break, run a bounded remediation runbook, page a human when
             the machine shouldn't decide, and write the postmortem.
           </p>
-          <div className="mt-7 flex flex-wrap items-center gap-3">
+          <div style={{ animationDelay: "210ms" }} className="rise mt-7 flex flex-wrap items-center gap-3">
             <button
               onClick={onOpen}
               className="rounded-md bg-ink px-4.5 py-2.5 text-[13.5px] font-semibold text-white transition-opacity hover:opacity-85"
@@ -87,14 +88,14 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               How it works
             </button>
           </div>
-          <p className="mt-4 text-[12px] text-faint">
+          <p style={{ animationDelay: "280ms" }} className="rise mt-4 text-[12px] text-faint">
             nothing to sign up for · the batch is already running · every number on this
             page is live from the engine
           </p>
         </div>
 
-        {/* live batch state — the proof the product runs */}
-        <LiveCard batch={batch} brain={brain} onRun={onRun} busy={busy} />
+        {/* the batch, in motion — the proof the product runs */}
+        <StreamCard batch={batch} brain={brain} onRun={onRun} busy={busy} />
       </section>
 
       {/* ------------------------------ the loop ------------------------------ */}
@@ -240,71 +241,6 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
         </div>
       </section>
     </div>
-  );
-}
-
-/* ------------------------------ live batch card ------------------------------ */
-
-function LiveCard({ batch, brain, onRun, busy }: {
-  batch: Batch | null; brain: string; onRun: () => void; busy: boolean;
-}) {
-  const rows: [string, string][] = batch
-    ? [
-        ["books", `${batch.counts.books} rows`],
-        ["settlements", `${batch.counts.settlements} rows`],
-        ["matched", `${batch.counts.matched} · ${batch.match_rate}%`],
-        ["incidents", `${batch.metrics.incidents_total} · ${batch.metrics.sev1} SEV-1`],
-        ["auto-resolved", `${batch.metrics.auto_resolved} · S3 budget`],
-        ["awaiting human", `${batch.metrics.awaiting_human}`],
-        ["paged", `${batch.metrics.paged} · S1 / S2`],
-        ["MTTR (auto)", `${batch.metrics.mttr_hours_auto ?? "—"}h`],
-      ]
-    : [];
-
-  return (
-    <aside className="card flex flex-col self-start p-0">
-      <div className="flex items-center justify-between border-b border-line px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-ok" aria-hidden />
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
-            live batch state
-          </span>
-        </div>
-        <span className="font-mono text-[11px] text-faint">
-          {batch ? `${batch.batch_id} · seed ${batch.seed}` : "booting"}
-        </span>
-      </div>
-
-      <div className="flex-1 px-4 py-3">
-        {batch ? (
-          <dl className="space-y-2 font-mono text-[12.5px]">
-            {rows.map(([k, v]) => (
-              <div key={k} className="flex items-baseline justify-between gap-4">
-                <dt className="text-faint">{k}</dt>
-                <dd className="tabular text-right text-ink">{v}</dd>
-              </div>
-            ))}
-          </dl>
-        ) : (
-          <div className="py-8 text-center font-mono text-[12px] text-faint">
-            starting the engine…
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
-        <span className="font-mono text-[11px] text-faint">
-          brain: {brain} · regenerates bit-for-bit
-        </span>
-        <button
-          onClick={onRun}
-          disabled={busy || !batch}
-          className="rounded-md border border-line2 bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-ink transition-colors hover:bg-paper disabled:opacity-40"
-        >
-          {busy ? "running…" : "re-run"}
-        </button>
-      </div>
-    </aside>
   );
 }
 
