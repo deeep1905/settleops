@@ -5,13 +5,14 @@ import { Board } from "./components/Board";
 import { IncidentDetail } from "./components/IncidentDetail";
 import { Postmortem } from "./components/Postmortem";
 import { HowItWorks } from "./components/HowItWorks";
+import { Landing } from "./components/Landing";
 
-type View = "board" | "incident" | "postmortem" | "how";
+type View = "home" | "board" | "incident" | "postmortem" | "how";
 
 export default function App() {
   const [batch, setBatch] = useState<Batch | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<View>("board");
+  const [view, setView] = useState<View>("home");
   const [current, setCurrent] = useState<Incident | null>(null);
   const [restarting, setRestarting] = useState(false);
   const [brain, setBrain] = useState<string>("rules");
@@ -52,7 +53,7 @@ export default function App() {
       {/* top bar */}
       <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
-          <button className="flex items-center gap-2.5" onClick={() => setView("board")} title="board">
+          <button className="flex items-center gap-2.5" onClick={() => setView("home")} title="overview">
             <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden>
               <rect width="32" height="32" rx="6" fill="#4F46E5" />
               <path d="M9 16.5l5 5 9-11" stroke="#fff" strokeWidth="3.2" fill="none"
@@ -64,6 +65,7 @@ export default function App() {
 
           <nav className="ml-auto flex items-center gap-1">
             {([
+              ["home", "Overview"],
               ["board", "Board"],
               ["postmortem", "Postmortem"],
               ["how", "How it works"],
@@ -72,7 +74,7 @@ export default function App() {
                 key={v}
                 onClick={() => setView(v)}
                 className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
-                  view === v || (view === "incident" && v === "board")
+                  view === v || (view === "incident" && (v === "board" || v === "home"))
                     ? "bg-accent-soft text-accent"
                     : "text-muted hover:bg-paper hover:text-ink"
                 }`}
@@ -98,12 +100,23 @@ export default function App() {
             the console stands alone, the numbers arrive when the engine does.
           </div>
         )}
-        {!batch && !error && (
+        {!batch && !error && view !== "home" && (
           <div className="card mb-6 px-4 py-10 text-center text-[13px] text-muted">
             starting the engine…
           </div>
         )}
-        {batch && (
+        {view === "home" && (
+          <Landing
+            batch={batch}
+            brain={brain}
+            onOpen={() => setView("board")}
+            onHow={() => setView("how")}
+            onPm={() => setView("postmortem")}
+            onRun={rerun}
+            busy={restarting}
+          />
+        )}
+        {batch && view !== "home" && (
           <>
             {view === "board" && <Board batch={batch} brain={brain} onOpen={openIncident} />}
             {view === "incident" && current && (
