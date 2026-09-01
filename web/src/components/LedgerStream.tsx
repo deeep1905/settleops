@@ -67,7 +67,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       [
         { id: inc.id, sev: inc.severity, klass: inc.break_class, key: `${inc.id}-${Date.now()}-${Math.random()}` },
         ...prev,
-      ].slice(0, 5),
+      ].slice(0, 3),
     );
   };
 
@@ -219,7 +219,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         ctx.globalAlpha = 1;
       };
 
-      /* floor rings */
+      /* floor rings — depth ticks down the runway */
       ctx.lineWidth = 1;
       for (const z of [300, 450, 600, 750]) {
         ctx.strokeStyle = `rgba(212,217,222,${0.6 - (z - 300) / 1400})`;
@@ -227,6 +227,18 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         ctx.moveTo(px(-250, z, camX), py(z, camY));
         ctx.lineTo(px(250, z, camX), py(z, camY));
         ctx.stroke();
+      }
+      /* runway grid — longitudinal lines that make the floor read as 3D;
+         the center line is the settled lane, dashed in accent */
+      for (const lx of [-150, -75, 0, 75, 150]) {
+        const center = lx === 0;
+        ctx.strokeStyle = center ? "rgba(79,70,229,0.18)" : "rgba(212,217,222,0.42)";
+        if (center) ctx.setLineDash([7, 9]);
+        ctx.beginPath();
+        ctx.moveTo(px(lx, 900, camX), py(900, camY));
+        ctx.lineTo(px(lx, 60, camX), py(60, camY));
+        ctx.stroke();
+        ctx.setLineDash([]);
       }
       /* lane borders */
       ctx.strokeStyle = "rgba(212,217,222,0.85)";
@@ -236,7 +248,15 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         ctx.lineTo(px(lx, 60, camX), py(60, camY));
         ctx.stroke();
       }
-      /* the matcher gate — a pulsing accent line across the floor */
+      /* the matcher gate — an aura first, then a pulsing accent line */
+      const gX = px(0, 150, camX);
+      const gY = py(150, camY);
+      const aura = 0.1 + 0.06 * (reduced ? 1 : (Math.sin(now / 480) + 1) / 2);
+      const gglow = ctx.createRadialGradient(gX, gY - 6, 6, gX, gY - 6, 130);
+      gglow.addColorStop(0, `rgba(79,70,229,${aura})`);
+      gglow.addColorStop(1, "rgba(79,70,229,0)");
+      ctx.fillStyle = gglow;
+      ctx.fillRect(gX - 140, gY - 140, 280, 200);
       const pulse = reduced ? 0.75 : 0.5 + 0.25 * (Math.sin(now / 480) + 1) / 2;
       ctx.strokeStyle = `rgba(79,70,229,${pulse})`;
       ctx.lineWidth = 1.6;
@@ -244,14 +264,6 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       ctx.moveTo(px(-135, 150, camX), py(150, camY));
       ctx.lineTo(px(135, 150, camX), py(150, camY));
       ctx.stroke();
-      ctx.fillStyle = `rgba(79,70,229,${0.04 + 0.05 * ((reduced ? 1 : (Math.sin(now / 480) + 1) / 2))})`;
-      ctx.beginPath();
-      ctx.moveTo(px(-135, 150, camX), py(150, camY));
-      ctx.lineTo(px(135, 150, camX), py(150, camY));
-      ctx.lineTo(px(135, 172, camX), py(172, camY));
-      ctx.lineTo(px(-135, 172, camX), py(172, camY));
-      ctx.closePath();
-      ctx.fill();
       /* the scanner — a bright segment sweeping the gate */
       const sweepT = reduced ? 0.5 : (now / 1300) % 1;
       const sweepX = -135 + 270 * sweepT;
@@ -300,8 +312,8 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       for (const it of items) it.paint();
 
       /* flares at the gate */
-      const gx = px(0, 150, camX);
-      const gy = py(150, camY);
+      const gx = gX;
+      const gy = gY;
       for (const f of flares) {
         const r = 4 + f.age * (f.small ? 18 : 26);
         ctx.globalAlpha = Math.max(0, 1 - f.age);
@@ -442,18 +454,16 @@ export function StreamCard({ batch, brain, busy, onRun }: {
 
   return (
     <aside
-      className="rise card flex flex-col self-start overflow-hidden"
+      className="rise card lift flex flex-col self-start overflow-hidden"
       style={{ animationDelay: "160ms" }}
       aria-label="live batch visualization"
     >
-      <div className="flex items-center justify-between border-b border-line px-4 py-3">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-ok" aria-hidden />
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
-            the batch, in motion
-          </span>
+      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <span className="live-dot" aria-hidden />
+          <span className="kicker text-muted">the batch, in motion</span>
         </div>
-        <span className="font-mono text-[11px] text-faint">
+        <span className="truncate font-mono text-[11px] text-faint">
           {batch ? `${batch.batch_id} · seed ${batch.seed}` : "booting"}
         </span>
       </div>
@@ -466,36 +476,30 @@ export function StreamCard({ batch, brain, busy, onRun }: {
           aria-label="Animated replay of the batch: books and rail rows flow toward the matcher gate; matched pairs merge and settle, breaks flare and land in the incident tray."
         />
 
-        {/* HUD — the real numbers, over the scene */}
-        <div className="pointer-events-none absolute left-3 top-2.5 flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-[2px] bg-ink/70" aria-hidden />
-          <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.05em] text-muted">
-            books · {batch?.counts.books ?? "—"}
-          </span>
-        </div>
-        <div className="pointer-events-none absolute right-3 top-2.5 flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-[2px] bg-accent/80" aria-hidden />
-          <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.05em] text-muted">
-            rail · {batch?.counts.settlements ?? "—"}
-          </span>
-        </div>
-        <div className="pointer-events-none absolute bottom-2.5 left-3">
-          <div className="font-mono text-[16px] font-semibold tabular leading-none text-ink">
+        {/* one HUD zone: a scrim, the match rate, the incident tray —
+            the lanes label themselves in-scene, the counts live in the footer */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/90 via-white/55 to-transparent" />
+
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-line/70 bg-white/75 px-3 py-2 backdrop-blur-[2px]">
+          <div className="kicker text-faint">match rate</div>
+          <div className="tabular mt-0.5 font-mono text-[20px] font-semibold leading-none text-ink">
             {batch ? `${batch.match_rate}%` : "—"}
           </div>
-          <div className="mt-1 font-mono text-[10px] uppercase tracking-[0.05em] text-faint">
-            matched · {batch ? `${batch.counts.matched} of ${batch.counts.books}` : "—"}
+          <div className="mt-1.5 font-mono text-[10px] text-faint">
+            {batch ? `${batch.counts.matched} of ${batch.counts.books} rows` : "—"}
           </div>
         </div>
 
         {/* the incident tray — real incidents, stamped as they break */}
-        <div className="pointer-events-none absolute bottom-2.5 right-3 flex max-w-[62%] flex-col items-end gap-1 sm:max-w-none">
-          {tray.map((t) => (
+        <div className="pointer-events-none absolute bottom-3 right-3 flex max-w-[58%] flex-col items-end gap-1 sm:max-w-none">
+          {tray.map((t, i) => (
             <div
               key={t.key}
-              className="pop flex items-center gap-1.5 rounded-md border border-line bg-white/95 px-2 py-1 shadow-[0_1px_3px_rgba(16,19,23,0.06)]"
+              style={{ opacity: i === 0 ? 1 : i === 1 ? 0.72 : 0.45 }}
+              className="pop flex items-center gap-1.5 rounded-md border border-line bg-white/85 px-2 py-1 shadow-[0_1px_3px_rgba(16,19,23,0.06)] backdrop-blur-[2px]"
             >
-              <span className="font-mono text-[10.5px] font-semibold text-accent">{t.id}</span>
+              <span className={`h-1.5 w-1.5 rounded-[2px] ${t.sev === "SEV-1" ? "bg-crit" : t.sev === "SEV-2" ? "bg-warn" : "bg-info"}`} aria-hidden />
+              <span className="font-mono text-[10.5px] font-semibold text-ink">{t.id}</span>
               <span className="hidden font-mono text-[10px] text-faint sm:inline">{classLabel[t.klass] ?? t.klass}</span>
               <span className={`rounded-[4px] px-1.5 py-px font-mono text-[9px] font-semibold ${sevTone(t.sev)}`}>
                 {t.sev}
@@ -516,14 +520,15 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         )}
       </div>
 
-      <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
-        <span className="font-mono text-[11px] text-faint">
+      <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
+        <span className="truncate font-mono text-[10.5px] text-faint">
+          {batch ? `books ${batch.counts.books} · rail ${batch.counts.settlements} · ` : ""}
           brain: {brain} · replayed from the ledger
         </span>
         <button
           onClick={onRun}
           disabled={busy || !batch}
-          className="rounded-md border border-line2 bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-ink transition-colors hover:bg-paper disabled:opacity-40"
+          className="shrink-0 rounded-md border border-line2 bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-ink transition-colors hover:border-ink/30 hover:bg-paper disabled:opacity-40"
         >
           {busy ? "running…" : "re-run"}
         </button>

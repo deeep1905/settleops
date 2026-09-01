@@ -129,11 +129,82 @@ export default function App() {
       </main>
 
       <footer className="border-t border-line bg-surface">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-6 text-[12px] text-faint sm:px-6">
-          <span>SettleOps · reconciliation as incident response</span>
-          <span>synthetic data · integer paise · deterministic seed</span>
-          <span className="font-mono">{brain === "rules" ? "brain: rules" : "brain: llm-assisted"}</span>
-          <span className="ml-auto">built for Razorpay AI Buildathon · Track 4</span>
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          {/* brand block */}
+          <div>
+            <div className="flex items-center gap-2.5">
+              <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden>
+                <rect width="32" height="32" rx="6" fill="#4F46E5" />
+                <path d="M9 16.5l5 5 9-11" stroke="#fff" strokeWidth="3.2" fill="none"
+                  strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="text-[15px] font-semibold tracking-[-0.01em]">SettleOps</span>
+            </div>
+            <p className="mt-3 max-w-[38ch] text-[12.5px] leading-relaxed text-muted">
+              The incident console for your books — deterministic matching, bounded
+              remediation, an audit trail born with every event.
+            </p>
+            <div className="mt-4 flex items-center gap-2 font-mono text-[10.5px] text-faint">
+              <span className="live-dot" aria-hidden />
+              {batch
+                ? `batch ${batch.batch_id} · seed ${batch.seed} · brain: ${brain}`
+                : `brain: ${brain}`}
+            </div>
+          </div>
+
+          {/* console nav */}
+          <nav aria-label="console">
+            <div className="kicker text-faint">console</div>
+            <ul className="mt-3 space-y-2">
+              {([
+                ["home", "Overview"],
+                ["board", "Board"],
+                ["postmortem", "Postmortem"],
+                ["how", "How it works"],
+              ] as const).map(([v, label]) => (
+                <li key={v}>
+                  <button
+                    onClick={() => { setView(v); window.scrollTo({ top: 0 }); }}
+                    className="text-[13px] text-muted transition-colors hover:text-ink"
+                  >
+                    {label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* the repo — every claim, greppable */}
+          <nav aria-label="repository">
+            <div className="kicker text-faint">the repo</div>
+            <ul className="mt-3 space-y-2">
+              {([
+                ["README", "https://github.com/deeep1905/settleops/blob/main/README.md"],
+                ["tests/", "https://github.com/deeep1905/settleops/tree/main/tests"],
+                ["Makefile", "https://github.com/deeep1905/settleops/blob/main/Makefile"],
+                ["docs/", "https://github.com/deeep1905/settleops/tree/main/docs"],
+              ] as const).map(([label, href]) => (
+                <li key={label}>
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-[12px] text-muted transition-colors hover:text-accent"
+                  >
+                    {label} <span aria-hidden>↗</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
+
+        <div className="border-t border-line">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-4 text-[12px] text-faint sm:px-6">
+            <span>SettleOps · reconciliation as incident response</span>
+            <span className="font-mono">synthetic data · integer paise · deterministic seed</span>
+            <span className="ml-auto">built for Razorpay AI Buildathon 2026 · Track 4</span>
+          </div>
         </div>
       </footer>
     </div>
