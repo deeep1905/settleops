@@ -1,0 +1,128 @@
+import { useCallback, useEffect, useState } from "react";
+import type { Batch, Incident } from "./types";
+import { getJSON, postJSON } from "./lib";
+import { Board } from "./components/Board";
+import { IncidentDetail } from "./components/IncidentDetail";
+import { Postmortem } from "./components/Postmortem";
+import { HowItWorks } from "./components/HowItWorks";
+
+type View = "board" | "incident" | "postmortem" | "how";
+
+export default function App() {
+  const [batch, setBatch] = useState<Batch | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<View>("board");
+  const [current, setCurrent] = useState<Incident | null>(null);
+  const [restarting, setRestarting] = useState(false);
+  const [brain, setBrain] = useState<string>("rules");
+
+  const load = useCallback(async () => {
+    try {
+      const h = await getJSON<{ brain: string }>("/api/health");
+      setBrain(h.brain);
+      const d = await getJSON<{ batch: Batch }>("/api/batch/latest");
+      setBatch(d.batch);
+      setError(null);
+    } catch (e) {
+      setError(String(e));
+    }
+  }, []);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const openIncident = (i: Incident) => { setCurrent(i); setView("incident"); };
+
+  const decide = async (id: string, decision: "approve" | "reject") => {
+    const d = await postJSON<{ incident: Incident }>(`/api/incidents/${id}/decide`, { decision });
+    setCurrent(d.incident);
+    setBatch((b) => b ? { ...b, incidents: b.incidents.map((x) => x.id === id ? d.incident : x) } : b);
+    void load();
+  };
+
+  const rerun = async () => {
+    setRestarting(true);
+    try {
+      await postJSON("/api/batch/run", {});
+      await load();
+    } finally { setRestarting(false); }
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* top bar */}
+      <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+          <button className="flex items-center gap-2.5" onClick={() => setView("board")} title="board">
+            <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden>
+              <rect width="32" height="32" rx="6" fill="#4F46E5" />
+              <path d="M9 16.5l5 5 9-11" stroke="#fff" strokeWidth="3.2" fill="none"
+                strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-[15px] font-semibold tracking-[-0.01em]">SettleOps</span>
+            <span className="hidden text-[12px] text-faint sm:inline">finance incident console</span>
+          </button>
+
+          <nav className="ml-auto flex items-center gap-1">
+            {([
+              ["board", "Board"],
+              ["postmortem", "Postmortem"],
+              ["how", "How it works"],
+            ] as const).map(([v, label]) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                  view === v || (view === "incident" && v === "board")
+                    ? "bg-accent-soft text-accent"
+                    : "text-muted hover:bg-paper hover:text-ink"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            <button
+              onClick={rerun}
+              disabled={restarting || !batch}
+              className="ml-2 rounded-md bg-ink px-3.5 py-1.5 text-[13px] font-semibold text-white transition-opacity hover:opacity-85 disabled:opacity-40"
+            >
+              {restarting ? "running…" : "Run batch"}
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:px-6">
+        {error && (
+          <div className="card mb-6 border-crit/30 bg-crit-soft px-4 py-3 text-[13px] text-crit">
+            Engine unreachable ({error}). Run <code className="font-mono">make run</code> and reload —
+            the console stands alone, the numbers arrive when the engine does.
+          </div>
+        )}
+        {!batch && !error && (
+          <div className="card mb-6 px-4 py-10 text-center text-[13px] text-muted">
+            starting the engine…
+          </div>
+        )}
+        {batch && (
+          <>
+            {view === "board" && <Board batch={batch} brain={brain} onOpen={openIncident} />}
+            {view === "incident" && current && (
+              <IncidentDetail incident={current} onBack={() => setView("board")} onDecide={decide} />
+            )}
+            {view === "postmortem" && <Postmortem onOpen={openIncident} />}
+            {view === "how" && <HowItWorks />}
+          </>
+        )}
+      </main>
+
+      <footer className="border-t border-line bg-surface">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-6 text-[12px] text-faint sm:px-6">
+          <span>SettleOps · reconciliation as incident response</span>
+          <span>synthetic data · integer paise · deterministic seed</span>
+          <span className="font-mono">{brain === "rules" ? "brain: rules" : "brain: llm-assisted"}</span>
+          <span className="ml-auto">built for Razorpay AI Buildathon · Track 4</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
