@@ -219,7 +219,9 @@ export function LogoMark({ size = 22, className = "" }: {
 /* broadcasts so the canvas scenes re-ink themselves.                 */
 /* ------------------------------------------------------------------ */
 
-export function ThemeToggle({ className = "" }: { className?: string }) {
+export function ThemeToggle({ className = "", night = false }: {
+  className?: string; night?: boolean;
+}) {
   const [dark, setDark] = useState<boolean | null>(null);
 
   const toggle = () => {
@@ -245,7 +247,9 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={toggle}
       aria-label={dark === null ? "Switch color theme" : dark ? "Switch to light mode" : "Switch to dark mode"}
       title={dark === null ? "Switch color theme" : dark ? "Switch to light mode" : "Switch to dark mode"}
-      className={`flex size-8 items-center justify-center rounded-full border border-line bg-surface text-faint transition-all hover:border-line2 hover:text-ink ${className}`}
+      className={`flex size-8 items-center justify-center rounded-full border bg-surface text-faint transition-all hover:border-line2 hover:text-ink ${
+        night ? "border-white/20 bg-white/[0.06] text-white/70 hover:border-white/40 hover:text-white" : ""
+      } ${className}`}
     >
       {/* sun — the face shown on the night desk */}
       <svg aria-hidden className="icon-sun size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"

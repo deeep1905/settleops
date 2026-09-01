@@ -61,7 +61,7 @@ does.
    engine lists exactly what it couldn't fix and why it refused to try.
 5. Open **How it works** if there's time — the loop and the five
    stopping rules.
-6. If asked for proof: `make test` (68 tests), `make report` (numbers
+6. If asked for proof: `make test` (97 tests), `make report` (numbers
    regenerate bit-for-bit; CI fails on any hand-edit).
 
 ## Where the AI is (and is not)

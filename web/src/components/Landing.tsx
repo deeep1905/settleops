@@ -71,7 +71,7 @@ const LABOR: [string, [Mark, string], [Mark, string], [Mark, string]][] = [
 ];
 
 const PROOF: [string, string, string][] = [
-  ["make test", "68 tests — matcher ground truth, stopping rules, API, audit chain", "68 passed"],
+  ["make test", "97 tests — matcher ground truth, stopping rules, API, audit chain, companion", "97 passed"],
   ["make report", "numbers regenerate from the data, bit-for-bit — CI fails on any hand-edit", "byte-identical"],
   ["make run", "the engine on :8000 — the same batch this page is showing", "live · batch R42"],
   ["make console", "this console, built from source", "this page"],
@@ -92,7 +92,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
   return (
     <div>
       {/* ------------------------------ hero ------------------------------ */}
-      <section className="grid-bg card mb-8 grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:gap-10">
+      <section className="grid-bg card mb-8 grid gap-8 px-7 py-12 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:gap-10">
         <div>
           <div className="rise inline-flex max-w-full items-center rounded-[4px] border border-line bg-surface px-3.5 py-1.5">
             <span className="kicker truncate text-muted">
@@ -100,10 +100,10 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               <span className="hidden md:inline"> · ai finance controller</span>
             </span>
           </div>
-          <h1 style={{ animationDelay: "70ms" }} className="rise mt-5 max-w-[16ch] text-balance text-[clamp(30px,4.6vw,46px)] font-semibold leading-[1.06] tracking-[-0.025em]">
+          <h1 style={{ animationDelay: "70ms" }} className="rise mt-5 max-w-[17ch] text-balance text-[clamp(34px,5.2vw,52px)] font-semibold leading-[1.05] tracking-[-0.027em]">
             Reconciliation is the SRE problem nobody gave an SRE.
           </h1>
-          <p style={{ animationDelay: "140ms" }} className="rise mt-5 max-w-[56ch] text-[14.5px] leading-relaxed text-muted">
+          <p style={{ animationDelay: "140ms" }} className="rise mt-5 max-w-[58ch] text-[15.5px] leading-relaxed text-muted">
             Finance teams close books by hand: eyeball the settlement file against the
             ledger, chase the differences in a spreadsheet, hope nothing slips. Ops teams
             solved this shape years ago. <span className="font-medium text-ink">SettleOps</span>{" "}
@@ -114,13 +114,13 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           <div style={{ animationDelay: "210ms" }} className="rise mt-7 flex flex-wrap items-center gap-3">
             <button
               onClick={onOpen}
-              className="rounded-[5px] bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
+              className="rounded-[5px] bg-ink px-6 py-3 text-[14px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
             >
               Open the board →
             </button>
             <button
               onClick={onHow}
-              className="rounded-[5px] border border-line2 bg-surface px-4.5 py-2.5 text-[13.5px] font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-ink/25"
+              className="rounded-[5px] border border-line2 bg-surface px-5 py-3 text-[14px] font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-ink/25"
             >
               How it works
             </button>
@@ -129,9 +129,9 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           <div style={{ animationDelay: "280ms" }} className="rise mt-7 flex flex-wrap items-center gap-y-4">
             {c ? (
               [
-                ["rows in flight", <span key="r" className="tabular font-mono text-[16px] font-semibold leading-none text-ink">{c.books} ↔ {c.settlements}</span>],
-                ["match rate", <CountUp key="m" value={batch!.match_rate} decimals={1} suffix="%" duration={900} className="font-mono text-[16px] font-semibold leading-none text-ink" />],
-                ["incidents", <CountUp key="i" value={c.incidents} duration={900} className="font-mono text-[16px] font-semibold leading-none text-ink" />],
+                ["rows in flight", <span key="r" className="tabular font-mono text-[18px] font-semibold leading-none text-ink">{c.books} ↔ {c.settlements}</span>],
+                ["match rate", <CountUp key="m" value={batch!.match_rate} decimals={1} suffix="%" duration={900} className="font-mono text-[18px] font-semibold leading-none text-ink" />],
+                ["incidents", <CountUp key="i" value={c.incidents} duration={900} className="font-mono text-[18px] font-semibold leading-none text-ink" />],
               ].map(([l, v], i) => (
                 <div key={l as string} className={i > 0 ? "border-l border-line pl-5 pr-5 sm:pl-6" : "pr-5"}>
                   <div className="kicker text-faint">{l}</div>
@@ -142,7 +142,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               <div className="kicker text-faint">starting the engine…</div>
             )}
           </div>
-          <p style={{ animationDelay: "340ms" }} className="rise mt-5 text-[12px] text-faint">
+          <p style={{ animationDelay: "340ms" }} className="rise mt-5 text-[12.5px] text-faint">
             nothing to sign up for · the batch is already running · every number on this
             page is live from the engine
           </p>
@@ -161,24 +161,24 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
             note="the how-it-works view has the full detail"
           />
         </Reveal>
-        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+        <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-5">
           {LOOP.map((s, i) => (
             <Reveal key={s.n} delay={i * 70} className="h-full">
-              <div className="card lift group h-full px-5 py-5">
+              <div className="card lift group h-full px-6 py-6">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-mono text-[12px] font-semibold text-accent">{s.n}</span>
-                  <code className="rounded-[3px] bg-accent-soft px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-accent">
+                  <span className="font-mono text-[12.5px] font-semibold text-accent">{s.n}</span>
+                  <code className="rounded-[3px] bg-accent-soft px-1.5 py-0.5 font-mono text-[11px] font-medium text-accent">
                     {s.fn}
                   </code>
                 </div>
-                <div className="mt-3.5 text-[15px] font-semibold">{s.t}</div>
-                <p className="mt-2 text-[13px] leading-relaxed text-muted">{s.d}</p>
+                <div className="mt-3.5 text-[16.5px] font-semibold">{s.t}</div>
+                <p className="mt-2 text-[14px] leading-relaxed text-muted">{s.d}</p>
               </div>
             </Reveal>
           ))}
         </div>
         <Reveal delay={200}>
-          <p className="mt-2.5 text-[12px] text-faint">
+          <p className="mt-2.5 text-[12.5px] text-faint">
             one code path — the same engine runs the console, the tests and{" "}
             <span className="font-mono">make report</span>
           </p>
@@ -206,10 +206,10 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               <table className="w-full min-w-[760px] text-left">
                 <thead>
                   <tr className="border-b border-line bg-paper/60">
-                    <th className="kicker px-5 py-2.5 pr-4 font-semibold text-faint">rule</th>
-                    <th className="kicker px-3 py-2.5 font-semibold text-faint">the condition</th>
-                    <th className="kicker px-3 py-2.5 font-semibold text-faint">why it exists</th>
-                    <th className="kicker px-5 py-2.5 text-right font-semibold text-faint">enforced by</th>
+                    <th className="kicker px-5 py-3 pr-4 font-semibold text-faint">rule</th>
+                    <th className="kicker px-3 py-3 font-semibold text-faint">the condition</th>
+                    <th className="kicker px-3 py-3 font-semibold text-faint">why it exists</th>
+                    <th className="kicker px-5 py-3 text-right font-semibold text-faint">enforced by</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -219,23 +219,23 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
                       style={{ animationDelay: `${idx * 45}ms` }}
                       className="row-in border-b border-line/70 transition-colors last:border-0 hover:bg-paper/50"
                     >
-                      <td className="px-5 py-4 pr-4 font-mono text-[12px] font-semibold text-ink">{id}</td>
-                      <td className="px-3 py-4">
-                        <div className="text-[13px] font-medium text-ink">{rule}</div>
-                        <div className="mt-0.5 text-[12px] text-muted">{qualifier}</div>
+                      <td className="px-5 py-5 pr-4 font-mono text-[12.5px] font-semibold text-ink">{id}</td>
+                      <td className="px-3 py-5">
+                        <div className="text-[14px] font-medium text-ink">{rule}</div>
+                        <div className="mt-0.5 text-[12.5px] text-muted">{qualifier}</div>
                       </td>
-                      <td className="px-3 py-4 text-[12.5px] leading-relaxed text-muted">{why}</td>
-                      <td className="px-5 py-4 text-right">
+                      <td className="px-3 py-5 text-[13.5px] leading-relaxed text-muted">{why}</td>
+                      <td className="px-5 py-5 text-right">
                         <a
                           href={`${TESTS}#L${line}`}
                           target="_blank"
                           rel="noreferrer"
                           title={`jump to ${test}()`}
-                          className="font-mono text-[11px] text-accent transition-colors hover:underline"
+                          className="font-mono text-[11.5px] text-accent transition-colors hover:underline"
                         >
                           {test}()
                         </a>
-                        <div className="mt-0.5 text-[10.5px] text-faint">
+                        <div className="mt-0.5 text-[11px] text-faint">
                           tests/test_engine.py:{line}
                         </div>
                       </td>
@@ -244,7 +244,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
                 </tbody>
               </table>
             </div>
-            <p className="border-t border-line px-5 py-3.5 text-[12.5px] leading-relaxed text-muted">
+            <p className="border-t border-line px-5 py-3.5 text-[13px] leading-relaxed text-muted">
               An automation that can spend is an automation that can go wrong at 3 a.m.
               The difference between an agent and a liability is written down — and enforced
               by the suite, not by prose.
@@ -268,10 +268,10 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               <table className="w-full min-w-[680px] text-left">
                 <thead>
                   <tr className="border-b border-line bg-paper/60">
-                    <th className="kicker px-5 py-2.5 pr-4 font-semibold text-faint">stage</th>
-                    <th className="kicker px-3 py-2.5 font-semibold text-faint">engine · deterministic</th>
-                    <th className="kicker px-3 py-2.5 font-semibold text-faint">ai assist · optional</th>
-                    <th className="kicker px-5 py-2.5 font-semibold text-faint">human</th>
+                    <th className="kicker px-5 py-3 pr-4 font-semibold text-faint">stage</th>
+                    <th className="kicker px-3 py-3 font-semibold text-faint">engine · deterministic</th>
+                    <th className="kicker px-3 py-3 font-semibold text-faint">ai assist · optional</th>
+                    <th className="kicker px-5 py-3 font-semibold text-faint">human</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -281,10 +281,10 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
                       style={{ animationDelay: `${idx * 45}ms` }}
                       className="row-in border-b border-line/70 last:border-0"
                     >
-                      <td className="px-5 py-3.5 pr-4 font-mono text-[12px] font-semibold text-ink">{stage}</td>
-                      <td className="px-3 py-3.5"><Cell mark={engine[0]}>{engine[1]}</Cell></td>
-                      <td className="px-3 py-3.5"><Cell mark={ai[0]}>{ai[1]}</Cell></td>
-                      <td className="px-5 py-3.5"><Cell mark={human[0]}>{human[1]}</Cell></td>
+                      <td className="px-5 py-4 pr-4 font-mono text-[12.5px] font-semibold text-ink">{stage}</td>
+                      <td className="px-3 py-4"><Cell mark={engine[0]}>{engine[1]}</Cell></td>
+                      <td className="px-3 py-4"><Cell mark={ai[0]}>{ai[1]}</Cell></td>
+                      <td className="px-5 py-4"><Cell mark={human[0]}>{human[1]}</Cell></td>
                     </tr>
                   ))}
                 </tbody>
@@ -295,7 +295,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               <Legend mark="opt" label="optional — off without a key" />
               <Legend mark="no" label="never" />
             </div>
-            <p className="border-t border-line px-5 py-3.5 text-[12.5px] leading-relaxed text-muted">
+            <p className="border-t border-line px-5 py-3.5 text-[13px] leading-relaxed text-muted">
               The assist never writes, never matches, never decides — a hypothesis is a
               comment on the incident, and without a key it stays off entirely: the rules
               brain is the deterministic fallback. Every money decision is a human click,
@@ -319,11 +319,11 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
             {PROOF.map(([cmd, d, result]) => (
               <div
                 key={cmd}
-                className="group flex flex-col gap-1.5 border-b border-line/60 px-5 py-4 transition-colors last:border-0 hover:bg-paper/60 sm:flex-row sm:items-center sm:gap-4"
+                className="group flex flex-col gap-1.5 border-b border-line/60 px-5 py-5 transition-colors last:border-0 hover:bg-paper/60 sm:flex-row sm:items-center sm:gap-4"
               >
                 <CopyChip cmd={cmd} className="sm:w-[8.5rem] sm:justify-center" />
-                <span className="text-[13px] leading-relaxed text-muted">{d}</span>
-                <span className="shrink-0 text-[11.5px] font-medium text-faint sm:ml-auto">
+                <span className="text-[13.5px] leading-relaxed text-muted">{d}</span>
+                <span className="shrink-0 text-[12px] font-medium text-faint sm:ml-auto">
                   {result}
                 </span>
               </div>
@@ -331,7 +331,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           </div>
         </Reveal>
         <Reveal delay={140}>
-          <p className="mt-3.5 max-w-[72ch] text-[12.5px] leading-relaxed text-muted">
+          <p className="mt-3.5 max-w-[72ch] text-[13px] leading-relaxed text-muted">
             {m ? (
               <>
                 the seed plants exactly {batch!.counts.incidents} breaks across six classes — the tests
@@ -348,29 +348,33 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
 
       {/* ------------------------------ cta band — the night desk, same in both themes ------------------------------ */}
       <Reveal>
-        <section className="grid-bg-dark relative overflow-hidden rounded-md border border-[#0d1017] bg-[#0d1017] px-6 py-9 text-white sm:px-9">
+        <section className="grid-bg-dark relative overflow-hidden rounded-t-md border border-b-0 border-[#0d1017] bg-[#0d1017] px-7 py-11 text-white sm:px-10">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="max-w-[52ch]">
               <div className="kicker text-white/50">you are the desk</div>
-              <h2 className="mt-2.5 text-balance text-[24px] font-semibold leading-[1.15] tracking-[-0.02em]">
+              <h2 className="mt-3 text-balance text-[27px] font-semibold leading-[1.12] tracking-[-0.022em]">
                 Twelve incidents are waiting. Two closed themselves. One pages you.
               </h2>
-              <p className="mt-2.5 text-[13px] leading-relaxed text-white/70">
+              <p className="mt-3 text-[14px] leading-relaxed text-white/70">
                 Approve a proposed adjustment, reject one, or let the SEV-1 sit — every
                 decision lands on the incident's timeline as a human event. The audit trail
                 is born in front of you.
+              </p>
+              <p className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-white/40">
+                <span className="rounded-[3px] border border-white/20 px-1.5 py-0.5 font-mono text-[10.5px] text-white/60">⌘K</span>
+                <span>anywhere — tally, the desk's companion, answers with the live batch (regex when no key, groq when there is one)</span>
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 lg:justify-end">
               <button
                 onClick={onOpen}
-                className="rounded-[5px] bg-white px-5 py-2.5 text-[13.5px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
+                className="rounded-[5px] bg-white px-6 py-3 text-[14px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
               >
                 Open the board →
               </button>
               <button
                 onClick={onPm}
-                className="rounded-[5px] border border-white/25 px-4.5 py-2.5 text-[13.5px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
+                className="rounded-[5px] border border-white/25 px-5 py-3 text-[14px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
               >
                 Read the postmortem
               </button>
@@ -379,18 +383,20 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           {m && (
             <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-white/10 pt-6 sm:grid-cols-4">
               {([
-                ["match rate", <CountUp key="mr" value={m.match_rate} decimals={1} suffix="%" className="font-mono text-[22px] font-semibold leading-none text-white" />],
-                ["incidents", <CountUp key="inc" value={m.incidents_total} className="font-mono text-[22px] font-semibold leading-none text-white" />],
-                ["auto-resolved", <CountUp key="ar" value={m.auto_resolved} className="font-mono text-[22px] font-semibold leading-none text-white" />],
-                ["waiting on you", <CountUp key="ah" value={m.awaiting_human} className="font-mono text-[22px] font-semibold leading-none text-white" />],
+                ["match rate", <CountUp key="mr" value={m.match_rate} decimals={1} suffix="%" className="font-mono text-[24px] font-semibold leading-none text-white" />],
+                ["incidents", <CountUp key="inc" value={m.incidents_total} className="font-mono text-[24px] font-semibold leading-none text-white" />],
+                ["auto-resolved", <CountUp key="ar" value={m.auto_resolved} className="font-mono text-[24px] font-semibold leading-none text-white" />],
+                ["waiting on you", <CountUp key="ah" value={m.awaiting_human} className="font-mono text-[24px] font-semibold leading-none text-white" />],
               ] as [string, ReactNode][]).map(([l, v]) => (
                 <div key={l}>
                   <div>{v}</div>
-                  <div className="kicker mt-2 text-white/45">{l}</div>
+                  <div className="kicker mt-2.5 text-white/45">{l}</div>
                 </div>
               ))}
             </div>
           )}
+          {/* the band dissolves into the footer's ink — one piece, not two */}
+          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-[#0d1017]" />
         </section>
       </Reveal>
     </div>
@@ -401,7 +407,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
 
 function Cell({ mark, children }: { mark: Mark; children?: string }) {
   if (mark === "no" || !children) {
-    return <span className="text-[12.5px] text-faint">—</span>;
+    return <span className="text-[13px] text-faint">—</span>;
   }
   return (
     <span className="flex items-start gap-2.5">
@@ -410,20 +416,20 @@ function Cell({ mark, children }: { mark: Mark; children?: string }) {
       ) : (
         <span className="mt-[5px] h-2.5 w-2.5 shrink-0 rounded-full border-[1.5px] border-accent bg-accent-soft" aria-hidden />
       )}
-      <span className="min-w-0 text-[12.5px] leading-relaxed text-muted">{children}</span>
+      <span className="min-w-0 text-[13px] leading-relaxed text-muted">{children}</span>
     </span>
   );
 }
 
 function Legend({ mark, label }: { mark: Mark; label: string }) {
   return (
-    <span className="flex items-center gap-2 text-[11.5px] text-faint">
+    <span className="flex items-center gap-2 text-[12px] text-faint">
       {mark === "yes" ? (
         <span className="h-2 w-2 rounded-full bg-ink" aria-hidden />
       ) : mark === "opt" ? (
         <span className="h-2.5 w-2.5 rounded-full border-[1.5px] border-accent" aria-hidden />
       ) : (
-        <span className="text-[12px]" aria-hidden>—</span>
+        <span className="text-[12.5px]" aria-hidden>—</span>
       )}
       {label}
     </span>
@@ -439,10 +445,10 @@ function SectionHead({ kicker, title, note, compact }: {
     <div className={compact ? "mb-2" : "mb-4"}>
       <div className="kicker text-accent">{kicker}</div>
       <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className={`font-semibold tracking-[-0.02em] ${compact ? "text-[16px]" : "text-[22px]"}`}>
+        <h2 className={`font-semibold tracking-[-0.02em] ${compact ? "text-[17.5px]" : "text-[24.5px]"}`}>
           {title}
         </h2>
-        {note && <span className="text-[12px] text-faint">{note}</span>}
+        {note && <span className="text-[12.5px] text-faint">{note}</span>}
       </div>
     </div>
   );

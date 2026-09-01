@@ -376,7 +376,7 @@ export function HowItWorks({ batch, onOpen, onPm }: {
               </table>
             </div>
             <p className="border-t border-line px-5 py-3.5 text-[12.5px] leading-relaxed text-muted">
-              Click any row — the assertion is the rule. The suite (68 tests) runs on every push,
+              Click any row — the assertion is the rule. The suite (97 tests) runs on every push,
               and the batch file regenerates bit-for-bit in CI or the build fails:{" "}
               <span className="font-medium text-ink">enforced by the suite, not by prose.</span>
             </p>

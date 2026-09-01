@@ -8,6 +8,8 @@
   POST /api/incidents/{id}/decide — human approve/reject (audit-logged)
   GET  /api/postmortem            — markdown postmortem + stats
   GET  /api/log                   — the raw event log
+  GET  /api/chat/status           — which brain Tally is on
+  POST /api/chat                  — ask Tally (commands → groq → regex)
 
 State: in-memory per process, deterministic seed on boot. On a serverless
 host each instance boots the same default batch, so the numbers a judge
@@ -24,6 +26,7 @@ from pydantic import BaseModel
 
 from .pipeline import human_decide, run_batch
 from .postmortem import write_postmortem
+from .assistant import tally_reply, tally_status
 
 app = FastAPI(title="SettleOps", version="1.0.0",
               description="The incident console for your books.")
@@ -43,6 +46,16 @@ class Decision(BaseModel):
 
 class RunSpec(BaseModel):
     seed: int | None = None
+
+
+class ChatMsg(BaseModel):
+    role: str          # "user" | "assistant"
+    content: str
+
+
+class ChatBody(BaseModel):
+    messages: list[ChatMsg]
+    page: str = "home"
 
 
 def _ok(**kw) -> dict:
@@ -116,3 +129,17 @@ def log():
     a.events = BATCH.event_log
     problems = a.validate()
     return _ok(events=[e.__dict__ for e in BATCH.event_log], violations=problems)
+
+
+@app.get("/api/chat/status")
+def chat_status():
+    return _ok(**tally_status())
+
+
+@app.post("/api/chat")
+def chat(body: ChatBody):
+    """Tally — the companion. Commands and regex never touch the network;
+    the groq path falls back to regex on any failure, so this endpoint
+    always answers."""
+    msgs = [{"role": m.role, "content": m.content} for m in body.messages]
+    return _ok(**tally_reply(BATCH, msgs, body.page))

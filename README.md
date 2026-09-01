@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/deeep1905/settleops/actions/workflows/ci.yml"><img src="https://github.com/deeep1905/settleops/actions/workflows/ci.yml/badge.svg" alt="ci" /></a>
-  <img src="https://img.shields.io/badge/tests-68%20passing-brightgreen" alt="tests: 68 passing" />
+  <img src="https://img.shields.io/badge/tests-97%20passing-brightgreen" alt="tests: 97 passing" />
   <img src="https://img.shields.io/badge/match%20rate-81.8%25-4f46e5" alt="match rate: 81.8%" />
   <img src="https://img.shields.io/badge/regeneration-bit--for--byte-0e1116" alt="regeneration: bit-for-bit" />
   <img src="https://img.shields.io/badge/python-3.11%2B-3776ab" alt="python 3.11+" />
@@ -51,7 +51,7 @@ regeneration, never by hand.
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-make test          # 68 tests — matcher ground truth, stopping rules, API, audit
+make test          # 97 tests — matcher ground truth, stopping rules, API, chat
 make run           # engine on :8000
 make console       # console on :5173  (or: open the deployed site)
 ```
@@ -98,6 +98,29 @@ changing severity or runbook. Without a key, a deterministic rules hint
 is used and the label says `rules`. Any error falls back to rules; the
 pipeline never fails because of the LLM.
 
+## Tally — the companion in the corner
+
+Every view of the console carries a small presence: **Tally**, a
+page-aware chat assistant (⌘K, or the button in the corner). It answers
+questions about the loop, the rules, the live batch and what is waiting
+on you — and it knows which view you are reading.
+
+Two brains, same contract (`settleops/assistant.py`, rules T1-T5):
+
+- **Slash commands** (`/status` `/breaks` `/awaiting` `/budget` `/pm`
+  `/help`) are answered by the engine itself from live batch data —
+  zero tokens, zero network.
+- **Free-form questions** go to Groq when `GROQ_API_KEY` is set
+  (default model `groq/compound-mini`, override with `TALLY_MODEL` /
+  `TALLY_BASE_URL`). Context is kept frugal on purpose: a ~120-word
+  live digest + the current page + the last 6 turns, answers capped at
+  260 tokens — the free tier survives the demo.
+- **Any failure** — no key, timeout, rate limit — falls back to a
+  deterministic regex brain that answers from the same live digest.
+  Every reply is tagged with the brain that produced it
+  (`groq · <model>` / `regex · 0 tokens`), the same honesty as the
+  diagnosis assist. Tally never moves money; it points at the gate.
+
 ## Layout
 
 ```
@@ -109,11 +132,12 @@ settleops/            the engine package
   pipeline.py         the one loop + human_decide() (the only money gate)
   audit.py            append-only incident log (JSONL, replayable)
   llm.py              optional labeled diagnosis assist
+  assistant.py        Tally — the chat companion (commands → groq → regex)
   postmortem.py       the SRE artifact
-  api.py              FastAPI service
+  api.py              FastAPI service (+ /api/chat)
 api/index.py          Vercel serverless entry
 web/                  the console (React + Vite + Tailwind)
-tests/                68 tests incl. planted-truth matcher proofs
+tests/                97 tests incl. planted-truth matcher proofs
 results/              batch_report.json + postmortem.md (regeneration-only)
 data/                 incident_log.jsonl (regeneration-only)
 docs/                 logo.svg, PITCH.md, FORM_ANSWERS.md
