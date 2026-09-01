@@ -92,14 +92,14 @@ html[data-theme="dark"] .icon-moon { display: none; }
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-radius: 8px;
+  border-radius: 5px;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border-radius: 5px;
+  border-radius: 3px;
   padding: 1px 8px;
   font-size: 11px;
   font-weight: 600;
@@ -194,7 +194,10 @@ html[data-theme="dark"] .icon-moon { display: none; }
 }
 
 /* ------------------------------------------------------------------ */
-/* interaction polish — hovers that say the surface is real           */
+/* interaction polish — hovers that say the surface is real. The       */
+/* radius scale is deliberately blunt (5px cards, 3px chips, circles   */
+/* only for dots and the lamp) so the console reads engineered,        */
+/* not soft-launched.                                                  */
 /* ------------------------------------------------------------------ */
 .lift {
   transition:
@@ -205,13 +208,14 @@ html[data-theme="dark"] .icon-moon { display: none; }
 .lift:hover {
   border-color: var(--color-line2);
   box-shadow: 0 1px 2px rgba(16, 19, 23, 0.04), 0 8px 24px -12px rgba(16, 19, 23, 0.14);
-  transform: translateY(-1px);
+  /* a hint of zoom — the card leans toward you */
+  transform: translateY(-1.5px) scale(1.007);
 }
 
 :where(button, a):focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {

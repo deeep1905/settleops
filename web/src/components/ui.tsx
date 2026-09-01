@@ -120,7 +120,7 @@ export function Select<T extends string>({ label, value, options, onChange }: {
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`flex items-center gap-2.5 rounded-lg border bg-surface py-1.5 pl-3 pr-2.5 transition-colors hover:border-line2 ${
+        className={`flex items-center gap-2.5 rounded-[5px] border bg-surface py-1.5 pl-3 pr-2.5 transition-colors hover:border-line2 ${
           open ? "border-accent" : "border-line"
         }`}
       >
@@ -139,7 +139,7 @@ export function Select<T extends string>({ label, value, options, onChange }: {
         <div
           role="listbox"
           aria-label={label}
-          className="menu-in absolute left-0 top-[calc(100%+6px)] z-30 min-w-[200px] rounded-lg border border-line bg-surface p-1 shadow-[0_8px_28px_-10px_rgba(16,19,23,0.28)]"
+          className="menu-in absolute left-0 top-[calc(100%+6px)] z-30 min-w-[200px] rounded-[5px] border border-line bg-surface p-1 shadow-[0_8px_28px_-10px_rgba(16,19,23,0.28)]"
         >
           {options.map((o, idx) => (
             <button
@@ -149,7 +149,7 @@ export function Select<T extends string>({ label, value, options, onChange }: {
               aria-selected={o.value === value}
               onClick={() => pick(o.value)}
               onMouseEnter={() => setHi(idx)}
-              className={`flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-[12.5px] transition-colors ${
+              className={`flex w-full items-center gap-2 rounded-[4px] px-2.5 py-1.5 text-left text-[12.5px] transition-colors ${
                 idx === hi ? "bg-accent-soft text-accent" : "text-ink"
               }`}
             >
@@ -203,7 +203,7 @@ export function LogoMark({ size = 22, className = "" }: {
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden className={`shrink-0 ${className}`}>
       <g transform="translate(-0.6,-0.6)">
-        <rect width="32" height="32" rx="7" fill="#4F46E5" />
+        <rect width="32" height="32" rx="4" fill="#4F46E5" />
         <circle cx="10" cy="10" r="3.3" fill="#fff" />
         <circle cx="22" cy="10" r="3.3" fill="#fff" />
         <circle cx="10" cy="22" r="3.3" fill="#fff" />
@@ -325,7 +325,7 @@ export function CopyChip({ cmd, className = "" }: { cmd: string; className?: str
       type="button"
       onClick={copy}
       title={`copy "${cmd}"`}
-      className={`flex shrink-0 items-center gap-2 rounded-md border bg-paper px-2.5 py-1 font-mono text-[12px] font-semibold text-ink transition-colors hover:border-accent/50 hover:text-accent ${className}`}
+      className={`flex shrink-0 items-center gap-2 rounded-[4px] border bg-paper px-2.5 py-1 font-mono text-[12px] font-semibold text-ink transition-colors hover:border-accent/50 hover:text-accent ${className}`}
     >
       <span className="pop" key={copied ? "y" : "n"}>{cmd}</span>
       {copied ? (

@@ -507,7 +507,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
             the lanes label themselves in-scene, the counts live in the footer */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface/90 via-surface/55 to-transparent" />
 
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-line/70 bg-surface/75 px-3 py-2 backdrop-blur-[2px]">
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-[5px] border border-line/70 bg-surface/75 px-3 py-2 backdrop-blur-[2px]">
           <div className="kicker text-faint">match rate</div>
           <div className="tabular mt-0.5 font-mono text-[20px] font-semibold leading-none text-ink">
             {batch ? `${batch.match_rate}%` : "—"}
@@ -523,7 +523,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
             <div
               key={t.key}
               style={{ opacity: i === 0 ? 1 : i === 1 ? 0.72 : 0.45 }}
-              className="pop flex items-center gap-1.5 rounded-md border border-line bg-surface/85 px-2 py-1 shadow-[0_1px_3px_rgba(16,19,23,0.06)] backdrop-blur-[2px]"
+              className="pop flex items-center gap-1.5 rounded-[4px] border border-line bg-surface/85 px-2 py-1 shadow-[0_1px_3px_rgba(16,19,23,0.06)] backdrop-blur-[2px]"
             >
               <span className={`h-1.5 w-1.5 rounded-[2px] ${t.sev === "SEV-1" ? "bg-crit" : t.sev === "SEV-2" ? "bg-warn" : "bg-info"}`} aria-hidden />
               <span className="font-mono text-[10.5px] font-semibold text-ink">{t.id}</span>
@@ -536,7 +536,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         </div>
 
         {busy && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md border border-line bg-surface/95 px-3 py-1.5 font-mono text-[11px] font-medium text-accent shadow-sm">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[4px] border border-line bg-surface/95 px-3 py-1.5 font-mono text-[11px] font-medium text-accent shadow-sm">
             re-running the batch…
           </div>
         )}
@@ -555,7 +555,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         <button
           onClick={onRun}
           disabled={busy || !batch}
-          className="shrink-0 rounded-md border border-line2 bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-ink transition-colors hover:border-ink/30 hover:bg-paper disabled:opacity-40"
+          className="shrink-0 rounded-[4px] border border-line2 bg-surface px-2.5 py-1 font-mono text-[11px] font-medium text-ink transition-colors hover:border-ink/30 hover:bg-paper disabled:opacity-40"
         >
           {busy ? "running…" : "re-run"}
         </button>

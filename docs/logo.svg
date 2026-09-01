@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <title>SettleOps — the exception grid</title>
   <g transform="translate(-9.6,-9.6)">
-    <rect width="512" height="512" rx="112" fill="#4F46E5"/>
+    <rect width="512" height="512" rx="64" fill="#4F46E5"/>
     <circle cx="160" cy="160" r="53" fill="#ffffff"/>
     <circle cx="352" cy="160" r="53" fill="#ffffff"/>
     <circle cx="160" cy="352" r="53" fill="#ffffff"/>

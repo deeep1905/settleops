@@ -90,7 +90,7 @@ export function Board({ batch, brain, onOpen }: {
         {(status !== "ALL" || klass !== "ALL") && (
           <button
             onClick={() => { setStatus("ALL"); setKlass("ALL"); }}
-            className="rounded-md px-2 py-1 text-[11.5px] font-medium text-faint transition-colors hover:text-ink"
+            className="rounded-[4px] px-2 py-1 text-[11.5px] font-medium text-faint transition-colors hover:text-ink"
           >
             reset
           </button>

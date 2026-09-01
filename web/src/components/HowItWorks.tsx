@@ -230,18 +230,18 @@ export function HowItWorks({ batch, onOpen, onPm }: {
             </div>
           </div>
         </Reveal>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {STEPS.map((s, i) => (
             <Reveal key={s.n} delay={i * 60} className="h-full">
-              <div className="card lift group flex h-full flex-col px-5 py-4">
+              <div className="card lift group flex h-full flex-col px-6 py-5">
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="font-mono text-[11px] font-semibold text-accent">{s.n}</span>
-                  <code className="rounded-[5px] bg-accent-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                  <span className="font-mono text-[12px] font-semibold text-accent">{s.n}</span>
+                  <code className="rounded-[3px] bg-accent-soft px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-accent">
                     {s.code}
                   </code>
                 </div>
-                <h3 className="mt-3 text-[14.5px] font-semibold">{s.t}</h3>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{s.d}</p>
+                <h3 className="mt-3.5 text-[16px] font-semibold">{s.t}</h3>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted">{s.d}</p>
                 {/* steps 05 and 06 point at the console artifacts they produce */}
                 <div className="mt-auto pt-3.5">
                   {s.n === "05" && (
@@ -303,7 +303,7 @@ export function HowItWorks({ batch, onOpen, onPm }: {
                             isOpen ? "bg-paper/50" : ""
                           }`}
                         >
-                          <td className="px-5 py-4 pr-4 font-mono text-[12px] font-semibold text-ink">
+                          <td className="px-5 py-4 pr-4 font-mono text-[13px] font-semibold text-ink">
                             {r.id}
                           </td>
                           <td className="px-3 py-4">
@@ -311,7 +311,7 @@ export function HowItWorks({ batch, onOpen, onPm }: {
                             <div className="mt-0.5 text-[12px] text-muted">{r.qualifier}</div>
                           </td>
                           <td className="px-3 py-4">
-                            <div className={`tabular font-mono text-[13px] font-semibold ${ev.tone ?? "text-ink"}`}>
+                            <div className={`tabular font-mono text-[14px] font-semibold ${ev.tone ?? "text-ink"}`}>
                               {ev.num}
                             </div>
                             <div className="mt-0.5 text-[11px] text-faint">{ev.label}</div>
@@ -323,7 +323,7 @@ export function HowItWorks({ batch, onOpen, onPm }: {
                                 aria-expanded={isOpen}
                                 title={isOpen ? "hide the test" : "read the test"}
                                 onClick={(e) => { e.stopPropagation(); toggle(r.id); }}
-                                className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 transition-colors hover:bg-accent-soft"
+                                className="inline-flex items-center gap-1.5 rounded-[4px] px-1.5 py-0.5 transition-colors hover:bg-accent-soft"
                               >
                                 <span className="font-mono text-[11px] font-medium text-accent">
                                   {r.test}()
@@ -386,7 +386,7 @@ export function HowItWorks({ batch, onOpen, onPm }: {
 
       {/* ---------- where you come in — the night desk ---------- */}
       <Reveal>
-        <section className="grid-bg-dark relative overflow-hidden rounded-xl border border-[#0d1017] bg-[#0d1017] px-6 py-8 text-white sm:px-9">
+        <section className="grid-bg-dark relative overflow-hidden rounded-md border border-[#0d1017] bg-[#0d1017] px-6 py-8 text-white sm:px-9">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="max-w-[52ch]">
               <div className="kicker text-white/50">where you come in</div>
@@ -404,13 +404,13 @@ export function HowItWorks({ batch, onOpen, onPm }: {
             <div className="flex flex-wrap items-center gap-3 lg:justify-end">
               <button
                 onClick={onOpen}
-                className="rounded-lg bg-white px-5 py-2.5 text-[13.5px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
+                className="rounded-[5px] bg-white px-5 py-2.5 text-[13.5px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
               >
                 Open the board →
               </button>
               <button
                 onClick={onPm}
-                className="rounded-lg border border-white/25 px-4.5 py-2.5 text-[13.5px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
+                className="rounded-[5px] border border-white/25 px-4.5 py-2.5 text-[13.5px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
               >
                 Read the postmortem
               </button>
@@ -425,11 +425,11 @@ export function HowItWorks({ batch, onOpen, onPm }: {
 /* a quiet link at the foot of a step card — docs pointing at the product */
 function StepLink({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <div className="border-t border-line/60 pt-3">
+    <div className="border-t border-line/60 pt-3.5">
       <button
         type="button"
         onClick={onClick}
-        className="text-[12px] font-medium text-accent transition-colors hover:text-ink hover:underline"
+        className="text-[12.5px] font-medium text-accent transition-colors hover:text-ink hover:underline"
       >
         {label}
       </button>

@@ -124,7 +124,7 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
                 const done = i.status === "RESOLVED" || (idx === 0 && i.runbook !== "");
                 return (
                   <li key={idx} className="flex items-start gap-3">
-                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-semibold ${
+                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[4px] border text-[10px] font-semibold ${
                       done ? "border-ok bg-ok-soft text-ok" : "border-line2 bg-surface text-faint"}`}>
                       {done ? "✓" : idx + 1}
                     </span>
@@ -145,13 +145,13 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => void onDecide(i.id, "approve")}
-                      className="rounded-lg bg-[#059669] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(5,150,105,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(5,150,105,0.55)] disabled:opacity-50 disabled:hover:translate-y-0"
+                      className="rounded-[5px] bg-[#059669] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(5,150,105,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(5,150,105,0.55)] disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       Approve &amp; close
                     </button>
                     <button
                       onClick={() => void onDecide(i.id, "reject")}
-                      className="rounded-lg border border-line2 bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-crit/40 hover:bg-crit-soft hover:text-crit disabled:opacity-50 disabled:hover:translate-y-0"
+                      className="rounded-[5px] border border-line2 bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-crit/40 hover:bg-crit-soft hover:text-crit disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       Reject &amp; reopen
                     </button>

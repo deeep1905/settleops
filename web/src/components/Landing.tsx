@@ -94,7 +94,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
       {/* ------------------------------ hero ------------------------------ */}
       <section className="grid-bg card mb-8 grid gap-8 px-6 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:gap-10">
         <div>
-          <div className="rise inline-flex max-w-full items-center rounded-full border border-line bg-surface px-3.5 py-1.5">
+          <div className="rise inline-flex max-w-full items-center rounded-[4px] border border-line bg-surface px-3.5 py-1.5">
             <span className="kicker truncate text-muted">
               razorpay ai buildathon 2026 · track 4
               <span className="hidden md:inline"> · ai finance controller</span>
@@ -114,13 +114,13 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           <div style={{ animationDelay: "210ms" }} className="rise mt-7 flex flex-wrap items-center gap-3">
             <button
               onClick={onOpen}
-              className="rounded-lg bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
+              className="rounded-[5px] bg-ink px-5 py-2.5 text-[13.5px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
             >
               Open the board →
             </button>
             <button
               onClick={onHow}
-              className="rounded-lg border border-line2 bg-surface px-4.5 py-2.5 text-[13.5px] font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-ink/25"
+              className="rounded-[5px] border border-line2 bg-surface px-4.5 py-2.5 text-[13.5px] font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-ink/25"
             >
               How it works
             </button>
@@ -161,18 +161,18 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
             note="the how-it-works view has the full detail"
           />
         </Reveal>
-        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
           {LOOP.map((s, i) => (
             <Reveal key={s.n} delay={i * 70} className="h-full">
-              <div className="card lift group h-full px-4 py-4">
+              <div className="card lift group h-full px-5 py-5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-mono text-[11px] font-semibold text-accent">{s.n}</span>
-                  <code className="rounded-[5px] bg-accent-soft px-1.5 py-0.5 font-mono text-[10px] font-medium text-accent">
+                  <span className="font-mono text-[12px] font-semibold text-accent">{s.n}</span>
+                  <code className="rounded-[3px] bg-accent-soft px-1.5 py-0.5 font-mono text-[10.5px] font-medium text-accent">
                     {s.fn}
                   </code>
                 </div>
-                <div className="mt-3 text-[14px] font-semibold">{s.t}</div>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{s.d}</p>
+                <div className="mt-3.5 text-[15px] font-semibold">{s.t}</div>
+                <p className="mt-2 text-[13px] leading-relaxed text-muted">{s.d}</p>
               </div>
             </Reveal>
           ))}
@@ -348,7 +348,7 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
 
       {/* ------------------------------ cta band — the night desk, same in both themes ------------------------------ */}
       <Reveal>
-        <section className="grid-bg-dark relative overflow-hidden rounded-xl border border-[#0d1017] bg-[#0d1017] px-6 py-9 text-white sm:px-9">
+        <section className="grid-bg-dark relative overflow-hidden rounded-md border border-[#0d1017] bg-[#0d1017] px-6 py-9 text-white sm:px-9">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="max-w-[52ch]">
               <div className="kicker text-white/50">you are the desk</div>
@@ -364,13 +364,13 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
             <div className="flex flex-wrap items-center gap-3 lg:justify-end">
               <button
                 onClick={onOpen}
-                className="rounded-lg bg-white px-5 py-2.5 text-[13.5px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
+                className="rounded-[5px] bg-white px-5 py-2.5 text-[13.5px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
               >
                 Open the board →
               </button>
               <button
                 onClick={onPm}
-                className="rounded-lg border border-white/25 px-4.5 py-2.5 text-[13.5px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
+                className="rounded-[5px] border border-white/25 px-4.5 py-2.5 text-[13.5px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
               >
                 Read the postmortem
               </button>
