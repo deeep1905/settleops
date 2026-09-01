@@ -1,4 +1,19 @@
-# SettleOps — the incident console for your books
+<p align="center">
+  <img src="docs/logo.svg" width="112" alt="SettleOps — three rows agree, one doesn't; the amber diamond is the break" />
+</p>
+
+<h1 align="center">SettleOps</h1>
+
+<p align="center"><strong>the incident console for your books</strong></p>
+
+<p align="center">
+  <a href="https://github.com/deeep1905/settleops/actions/workflows/ci.yml"><img src="https://github.com/deeep1905/settleops/actions/workflows/ci.yml/badge.svg" alt="ci" /></a>
+  <img src="https://img.shields.io/badge/tests-68%20passing-brightgreen" alt="tests: 68 passing" />
+  <img src="https://img.shields.io/badge/match%20rate-81.8%25-4f46e5" alt="match rate: 81.8%" />
+  <img src="https://img.shields.io/badge/regeneration-bit--for--byte-0e1116" alt="regeneration: bit-for-bit" />
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776ab" alt="python 3.11+" />
+  <img src="https://img.shields.io/badge/license-MIT-3a3a3a" alt="MIT" />
+</p>
 
 Reconciliation is the SRE problem nobody gave an SRE. Finance teams close
 books by hand: they eyeball a settlement file against their ledger, chase
@@ -8,7 +23,8 @@ runbook, page a human when the automation shouldn't decide, write a
 postmortem. **SettleOps runs that loop on a payment reconciliation batch.**
 
 Built for the **Razorpay AI Buildathon 2026 · Track 4 (AI Finance
-Controller)** · synthetic data, integer paise, test-mode only.
+Controller)** by [deeep1905](https://github.com/deeep1905) · synthetic
+data, integer paise, test-mode only.
 
 ```
  ingest two sources → match deterministically → diagnose each break
@@ -100,8 +116,7 @@ web/                  the console (React + Vite + Tailwind)
 tests/                68 tests incl. planted-truth matcher proofs
 results/              batch_report.json + postmortem.md (regeneration-only)
 data/                 incident_log.jsonl (regeneration-only)
-docs/PITCH.md         the walkthrough in plain language
-docs/FORM_ANSWERS.md  submission form answers, claim → evidence
+docs/                 logo.svg, PITCH.md, FORM_ANSWERS.md
 DEPLOY.md             local + Vercel (and why not Render/Railway)
 ```
 
@@ -125,6 +140,11 @@ wake — a judge clicking your link sees a dead page. That is why Vercel.
 - The matcher handles the six planted classes plus the defensive branches;
   a production system needs fuzzy matching (names, partial refs) and a
   real persistence layer. What's here is the honest core loop.
+
+## The mark
+
+Three rows agree; one doesn't. The amber diamond is the break — the one
+row that becomes an incident.
 
 ## License
 

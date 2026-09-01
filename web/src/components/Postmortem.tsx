@@ -113,7 +113,7 @@ export function Postmortem({ onBoard }: { onBoard: () => void }) {
 
           <button
             onClick={onBoard}
-            className="w-full rounded-lg bg-ink px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
+            className="w-full rounded-lg bg-ink px-4 py-2.5 text-[13px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
           >
             Work the board →
           </button>

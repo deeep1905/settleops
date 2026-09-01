@@ -145,7 +145,7 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => void onDecide(i.id, "approve")}
-                      className="rounded-lg bg-ok px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(5,150,105,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(5,150,105,0.55)] disabled:opacity-50 disabled:hover:translate-y-0"
+                      className="rounded-lg bg-[#059669] px-4 py-2 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(5,150,105,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(5,150,105,0.55)] disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       Approve &amp; close
                     </button>

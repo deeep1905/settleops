@@ -18,25 +18,44 @@ import { classLabel, sevTone } from "../lib";
  * prefers-reduced-motion gets one composed static frame instead.
  */
 
-/* raw hex for canvas — DOM chips keep the Tailwind tones from lib.ts */
-const SEV_COLOR: Record<string, string> = {
-  "SEV-1": "#e11d48",
-  "SEV-2": "#d97706",
-  "SEV-3": "#0284c7",
+/* the canvas inks itself from the page's own tokens — flip the theme
+   and the scene re-inks on the next frame. Tokens are hex in both
+   palettes; DOM chips keep the Tailwind tones from lib.ts */
+interface Pal {
+  surface: string; accentSoft: string; okSoft: string;
+  line2: string; faint: string; accent: string;
+  ok: string; crit: string; warn: string; info: string; ink: string;
+}
+const pal = (): Pal => {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (n: string) => cs.getPropertyValue(n).trim();
+  return {
+    surface: v("--color-surface"), accentSoft: v("--color-accent-soft"), okSoft: v("--color-ok-soft"),
+    line2: v("--color-line2"), faint: v("--color-faint"), accent: v("--color-accent"),
+    ok: v("--color-ok"), crit: v("--color-crit"), warn: v("--color-warn"), info: v("--color-info"),
+    ink: v("--color-ink"),
+  };
 };
-const OK = "#059669";
+const sevHex = (sev: string, p: Pal): string =>
+  sev === "SEV-2" ? p.warn : sev === "SEV-3" ? p.info : p.crit;
 
-/* hex → rgb mix, for the break telegraph tint */
+/* parse #hex or rgb() — so mixes can chain */
+const parse = (c: string): number[] => {
+  if (c[0] === "#" && c.length >= 7) {
+    return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  }
+  const m = c.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+  return m ? [+m[1], +m[2], +m[3]] : [16, 19, 23];
+};
 const mix = (a: string, b: string, t: number): string => {
-  const p = (c: string) => [
-    parseInt(c.slice(1, 3), 16),
-    parseInt(c.slice(3, 5), 16),
-    parseInt(c.slice(5, 7), 16),
-  ];
-  const A = p(a);
-  const B = p(b);
+  const A = parse(a);
+  const B = parse(b);
   const k = Math.max(0, Math.min(1, t));
   return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(",")})`;
+};
+const rgba = (c: string, a: number): string => {
+  const [r, g, b] = parse(c);
+  return `rgba(${r},${g},${b},${a})`;
 };
 
 interface TrayItem {
@@ -144,22 +163,24 @@ export function StreamCard({ batch, brain, busy, onRun }: {
     };
 
     const resolve = (p: Pair) => {
+      const P = pal();
       if (p.inc) {
-        const sev = SEV_COLOR[p.inc.severity] ?? "#e11d48";
+        const sev = sevHex(p.inc.severity, P);
         flares.push({ age: 0, color: sev, small: false });
         spawnParticles(sev, 7);
-        dying.push({ x: -40, z: 150, a: 1, fill: "#f6f8fa", top: "#ffffff", stroke: sev });
-        dying.push({ x: 40, z: 150, a: 1, fill: "#e8ebfd", top: "#f4f5fe", stroke: sev });
+        dying.push({ x: -40, z: 150, a: 1, fill: P.surface, top: mix(P.surface, "#ffffff", 0.5), stroke: sev });
+        dying.push({ x: 40, z: 150, a: 1, fill: P.accentSoft, top: mix(P.accentSoft, "#ffffff", 0.45), stroke: sev });
         pushTray(p.inc);
       } else {
-        flares.push({ age: 0, color: OK, small: true });
-        spawnParticles(OK, 4);
+        flares.push({ age: 0, color: P.ok, small: true });
+        spawnParticles(P.ok, 4);
         merged.push({ z: 150, a: 1 });
       }
     };
 
     /* ---------- the renderer ---------- */
     const draw = (now: number) => {
+      const P = pal();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
       const camX = cam.x + (reduced ? 0 : Math.sin(now / 1700) * 2.5);
@@ -177,9 +198,9 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         const x2b = px(xw + 30, zb, camX);
         const yTb = py(zb, camY) - 18 * persp(zb);
         const alpha = Math.max(0, Math.min(1, a));
-        /* contact shadow — grounds the box on the floor */
+        /* contact shadow — grounds the box on the floor (dark in both themes) */
         ctx.globalAlpha = 0.13 * alpha;
-        ctx.fillStyle = "#101317";
+        ctx.fillStyle = "#000000";
         ctx.beginPath();
         ctx.ellipse(px(xw, zf, camX), yB + 2.5, 31 * s0, 4.5 * s0, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -205,13 +226,13 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         ctx.moveTo(x1, yT); ctx.lineTo(x2, yT); ctx.lineTo(x2b, yTb); ctx.lineTo(x1b, yTb);
         ctx.closePath();
         ctx.fillStyle = top; ctx.fill();
-        ctx.strokeStyle = "rgba(16,19,23,0.08)";
+        ctx.strokeStyle = "rgba(0,0,0,0.08)";
         ctx.lineWidth = 1;
         ctx.stroke();
         /* front face — vertical shading sells the volume */
         const frontGrad = ctx.createLinearGradient(0, yT, 0, yB);
         frontGrad.addColorStop(0, fill);
-        frontGrad.addColorStop(1, mix(fill, "#101317", 0.14));
+        frontGrad.addColorStop(1, mix(fill, "#000000", 0.14));
         ctx.beginPath();
         ctx.rect(x1, yT, x2 - x1, yB - yT);
         ctx.fillStyle = frontGrad; ctx.fill();
@@ -222,7 +243,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       /* floor rings — depth ticks down the runway */
       ctx.lineWidth = 1;
       for (const z of [300, 450, 600, 750]) {
-        ctx.strokeStyle = `rgba(212,217,222,${0.6 - (z - 300) / 1400})`;
+        ctx.strokeStyle = rgba(P.line2, 0.6 - (z - 300) / 1400);
         ctx.beginPath();
         ctx.moveTo(px(-250, z, camX), py(z, camY));
         ctx.lineTo(px(250, z, camX), py(z, camY));
@@ -232,7 +253,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
          the center line is the settled lane, dashed in accent */
       for (const lx of [-150, -75, 0, 75, 150]) {
         const center = lx === 0;
-        ctx.strokeStyle = center ? "rgba(79,70,229,0.18)" : "rgba(212,217,222,0.42)";
+        ctx.strokeStyle = center ? rgba(P.accent, 0.18) : rgba(P.line2, 0.42);
         if (center) ctx.setLineDash([7, 9]);
         ctx.beginPath();
         ctx.moveTo(px(lx, 900, camX), py(900, camY));
@@ -241,7 +262,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         ctx.setLineDash([]);
       }
       /* lane borders */
-      ctx.strokeStyle = "rgba(212,217,222,0.85)";
+      ctx.strokeStyle = rgba(P.line2, 0.85);
       for (const lx of [-205, 205]) {
         ctx.beginPath();
         ctx.moveTo(px(lx, 900, camX), py(900, camY));
@@ -253,12 +274,12 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       const gY = py(150, camY);
       const aura = 0.1 + 0.06 * (reduced ? 1 : (Math.sin(now / 480) + 1) / 2);
       const gglow = ctx.createRadialGradient(gX, gY - 6, 6, gX, gY - 6, 130);
-      gglow.addColorStop(0, `rgba(79,70,229,${aura})`);
-      gglow.addColorStop(1, "rgba(79,70,229,0)");
+      gglow.addColorStop(0, rgba(P.accent, aura));
+      gglow.addColorStop(1, rgba(P.accent, 0));
       ctx.fillStyle = gglow;
       ctx.fillRect(gX - 140, gY - 140, 280, 200);
       const pulse = reduced ? 0.75 : 0.5 + 0.25 * (Math.sin(now / 480) + 1) / 2;
-      ctx.strokeStyle = `rgba(79,70,229,${pulse})`;
+      ctx.strokeStyle = rgba(P.accent, pulse);
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.moveTo(px(-135, 150, camX), py(150, camY));
@@ -267,7 +288,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       /* the scanner — a bright segment sweeping the gate */
       const sweepT = reduced ? 0.5 : (now / 1300) % 1;
       const sweepX = -135 + 270 * sweepT;
-      ctx.strokeStyle = "rgba(79,70,229,0.65)";
+      ctx.strokeStyle = rgba(P.accent, 0.65);
       ctx.lineWidth = 2.4;
       ctx.lineCap = "round";
       ctx.beginPath();
@@ -277,7 +298,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       ctx.lineCap = "butt";
       ctx.font = '9.5px "JetBrains Mono", ui-monospace, monospace';
       ctx.textAlign = "center";
-      ctx.fillStyle = "rgba(139,152,163,0.95)";
+      ctx.fillStyle = P.faint;
       ctx.fillText("the matcher", px(0, 150, camX), py(150, camY) - 8);
       ctx.fillText("books", px(-178, 830, camX), py(830, camY) - 15);
       ctx.fillText("rail", px(178, 830, camX), py(830, camY) - 15);
@@ -285,6 +306,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       /* chips — painter's algorithm, far first */
       interface D { z: number; paint: () => void }
       const items: D[] = [];
+      const bookEdge = mix(P.surface, P.ink, 0.25);
       for (const p of pairs) {
         const z = 900 - 750 * p.t;
         const conv = -175 + 135 * p.t;
@@ -292,18 +314,18 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         const bx = conv + wob;
         const rx = -conv - wob * 0.7;
         const telegraph = p.inc ? Math.max(0, (p.t - 0.55) / 0.45) : 0;
-        const sevC = p.inc ? SEV_COLOR[p.inc.severity] : null;
+        const sevC = p.inc ? sevHex(p.inc.severity, P) : null;
         items.push({
           z,
-          paint: () => drawChip(bx, z, 1, "#f6f8fa", "#ffffff", sevC && telegraph > 0 ? mix("#b9c1c9", sevC, telegraph) : "#b9c1c9"),
+          paint: () => drawChip(bx, z, 1, P.surface, mix(P.surface, "#ffffff", 0.35), sevC && telegraph > 0 ? mix(bookEdge, sevC, telegraph) : bookEdge),
         });
         items.push({
           z,
-          paint: () => drawChip(rx, z, 1, "#e8ebfd", "#f4f5fe", sevC && telegraph > 0 ? mix("#8f89e8", sevC, telegraph) : "#8f89e8"),
+          paint: () => drawChip(rx, z, 1, P.accentSoft, mix(P.accentSoft, "#ffffff", 0.45), sevC && telegraph > 0 ? mix(P.accent, sevC, telegraph) : P.accent),
         });
       }
       for (const mm of merged) {
-        items.push({ z: mm.z, paint: () => drawChip(0, mm.z, mm.a, "#d9f3e4", "#ecfdf5", OK) });
+        items.push({ z: mm.z, paint: () => drawChip(0, mm.z, mm.a, P.okSoft, mix(P.okSoft, "#ffffff", 0.5), P.ok) });
       }
       for (const d of dying) {
         items.push({ z: d.z, paint: () => drawChip(d.x, d.z, d.a, d.fill, d.top, d.stroke, false) });
@@ -333,11 +355,11 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       }
       ctx.globalAlpha = 1;
 
-      /* horizon fog — depth without darkening the card */
+      /* horizon fog — depth without darkening the card (the surface's own color) */
       const fogTop = BASE() - 26 + camY * 0.4;
       const grad = ctx.createLinearGradient(0, fogTop, 0, fogTop + 122);
-      grad.addColorStop(0, "rgba(255,255,255,0.95)");
-      grad.addColorStop(1, "rgba(255,255,255,0)");
+      grad.addColorStop(0, rgba(P.surface, 0.95));
+      grad.addColorStop(1, rgba(P.surface, 0));
       ctx.fillStyle = grad;
       ctx.fillRect(0, fogTop, W, 122);
     };
@@ -388,7 +410,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         { t: 0.78, seed: 5.0, inc: null },
       ];
       merged = [{ z: 80, a: 1 }];
-      flares = [{ age: 0.45, color: OK, small: true }];
+      flares = [{ age: 0.45, color: pal().ok, small: true }];
       if (b && !trayInit.current) {
         trayInit.current = true;
         setTray(
@@ -436,6 +458,11 @@ export function StreamCard({ batch, brain, busy, onRun }: {
     wrap.addEventListener("pointermove", onMove);
     wrap.addEventListener("pointerleave", onLeave);
 
+    /* the desk lamp flipped — re-ink the composed frame (the animated
+       loop re-reads the palette every frame anyway) */
+    const onTheme = () => { redrawRef.current?.(); };
+    window.addEventListener("settleops:theme", onTheme);
+
     if (!reduced) raf = requestAnimationFrame(frame);
 
     return () => {
@@ -443,6 +470,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
       ro.disconnect();
       wrap.removeEventListener("pointermove", onMove);
       wrap.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("settleops:theme", onTheme);
       redrawRef.current = null;
     };
   }, []);
@@ -477,9 +505,9 @@ export function StreamCard({ batch, brain, busy, onRun }: {
 
         {/* one HUD zone: a scrim, the match rate, the incident tray —
             the lanes label themselves in-scene, the counts live in the footer */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/90 via-white/55 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface/90 via-surface/55 to-transparent" />
 
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-line/70 bg-white/75 px-3 py-2 backdrop-blur-[2px]">
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-line/70 bg-surface/75 px-3 py-2 backdrop-blur-[2px]">
           <div className="kicker text-faint">match rate</div>
           <div className="tabular mt-0.5 font-mono text-[20px] font-semibold leading-none text-ink">
             {batch ? `${batch.match_rate}%` : "—"}
@@ -495,7 +523,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
             <div
               key={t.key}
               style={{ opacity: i === 0 ? 1 : i === 1 ? 0.72 : 0.45 }}
-              className="pop flex items-center gap-1.5 rounded-md border border-line bg-white/85 px-2 py-1 shadow-[0_1px_3px_rgba(16,19,23,0.06)] backdrop-blur-[2px]"
+              className="pop flex items-center gap-1.5 rounded-md border border-line bg-surface/85 px-2 py-1 shadow-[0_1px_3px_rgba(16,19,23,0.06)] backdrop-blur-[2px]"
             >
               <span className={`h-1.5 w-1.5 rounded-[2px] ${t.sev === "SEV-1" ? "bg-crit" : t.sev === "SEV-2" ? "bg-warn" : "bg-info"}`} aria-hidden />
               <span className="font-mono text-[10.5px] font-semibold text-ink">{t.id}</span>
@@ -508,7 +536,7 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         </div>
 
         {busy && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md border border-line bg-white/92 px-3 py-1.5 font-mono text-[11px] font-medium text-accent shadow-sm">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md border border-line bg-surface/95 px-3 py-1.5 font-mono text-[11px] font-medium text-accent shadow-sm">
             re-running the batch…
           </div>
         )}

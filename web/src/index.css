@@ -34,7 +34,48 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  transition: background-color 0.22s ease, color 0.22s ease;
 }
+
+/* ------------------------------------------------------------------ */
+/* the night desk — the same tokens, re-inked. One attribute on <html> */
+/* flips the whole console; the utilities resolve the vars at use      */
+/* time, so every surface, line and status tone follows.               */
+/* ------------------------------------------------------------------ */
+:root {
+  --grid-line: rgba(16, 19, 23, 0.035);
+}
+
+html[data-theme="dark"] {
+  --color-paper: #0e1116;
+  --color-surface: #161a22;
+  --color-line: #242a35;
+  --color-line2: #323a48;
+  --color-ink: #e9ecf4;
+  --color-muted: #a0a9ba;
+  --color-faint: #727d90;
+
+  --color-accent: #9399ff;
+  --color-accent-soft: #20263a;
+
+  --color-ok: #3dd68c;
+  --color-ok-soft: #10231c;
+  --color-warn: #f5b546;
+  --color-warn-soft: #291e0b;
+  --color-crit: #ff8095;
+  --color-crit-soft: #301421;
+  --color-info: #56b9f0;
+  --color-info-soft: #0c1c2a;
+
+  --grid-line: rgba(233, 236, 244, 0.055);
+}
+
+/* the theme lamp's two faces — CSS-driven, so they are always correct
+   without JS state (sun on the night desk, moon on the day desk) */
+.icon-sun { display: none; }
+.icon-moon { display: block; }
+html[data-theme="dark"] .icon-sun { display: block; }
+html[data-theme="dark"] .icon-moon { display: none; }
 
 /* ------------------------------------------------------------------ */
 /* the kicker — a small tracked label in the text face; mono is       */
@@ -73,8 +114,8 @@ body {
 /* subtle grid on the hero strip — console texture, not decoration */
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(16, 19, 23, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(16, 19, 23, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
