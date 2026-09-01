@@ -3,7 +3,7 @@
 ## 1. Run locally (60 seconds)
 
 ```bash
-git clone https://github.com/Deep1905/settleops.git && cd settleops
+git clone https://github.com/deeep1905/settleops.git && cd settleops
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 make run        # engine → http://localhost:8000 (API docs at /docs)
@@ -25,8 +25,8 @@ tier has no spin-down: static assets are always served instantly, and
 the Python function wakes per request (~1–2 s cold start, with an honest
 "starting the engine…" state in the console). No credit card needed.
 
-1. Push the repo (done — `github.com/Deep1905/settleops`).
-2. Open https://vercel.com/new/clone?repository-url=https://github.com/Deep1905/settleops
+1. Push the repo (done — `github.com/deeep1905/settleops`).
+2. Open https://vercel.com/new/clone?repository-url=https://github.com/deeep1905/settleops
    (or vercel.com → Add New → Project → import the repo).
 3. Framework preset: **Other** (zero-config picks it up). The build is
    driven by `vercel.json`:

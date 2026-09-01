@@ -13,11 +13,11 @@ a postmortem at the end. It's SRE discipline applied to finance close.
 
 ## Why I built this
 
-I come from the DevOps side — Jenkins, pipelines, incident response.
-Watching a finance team close books, I recognized the shape immediately:
-two systems that should agree, a pile of differences, a human triaging
-them by hand in a spreadsheet. Ops solved this with monitoring, runbooks
-and paging. Finance still does it with eyeballs. That's the gap.
+The first time I watched a finance team close their books, I recognized
+the shape from ops culture: two systems that should agree, a pile of
+differences, a human triaging them by hand in a spreadsheet. Ops teams
+solved exactly this problem years ago — monitoring, runbooks, paging,
+postmortems. Finance still does it with eyeballs. That's the gap.
 
 Reconciliation specifically: the payment rail settles what actually
 happened, the books record what we think happened, and every difference
