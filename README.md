@@ -1,0 +1,131 @@
+# SettleOps — the incident console for your books
+
+Reconciliation is the SRE problem nobody gave an SRE. Finance teams close
+books by hand: they eyeball a settlement file against their ledger, chase
+the differences in a spreadsheet, and hope nothing slips. Ops teams solved
+this shape of problem years ago — detect, diagnose, run a bounded
+runbook, page a human when the automation shouldn't decide, write a
+postmortem. **SettleOps runs that loop on a payment reconciliation batch.**
+
+Built for the **Razorpay AI Buildathon 2026 · Track 4 (AI Finance
+Controller)** · synthetic data, integer paise, test-mode only.
+
+```
+ ingest two sources → match deterministically → diagnose each break
+   → remediate by runbook → page a human → write the postmortem
+```
+
+## What the demo batch shows
+
+| metric | value | how you know it's honest |
+|---|---|---|
+| books / settlement rows | 66 / 66 | seeded generator, fixed clock |
+| match rate | **81.8%** (54/66) | the generator *plants* exactly 12 breaks — tests assert the matcher finds exactly those, no more, no less |
+| incidents | 12 | 6 classes: timing gap ×3, amount drift ×2, missing entry ×2, duplicate ×2, fee mismatch ×2, currency ×1 |
+| auto-resolved | 2 | timing gaps that closed inside the T+3 window — bounded by stopping rule S3 (max 5) |
+| awaiting human | 9 | every money-adjacent action is a proposal or a page, never a silent write |
+| paged | 5 | ≥ ₹50,000, currency risk, unrecorded money, duplicates |
+| MTTR (auto) | 0.77 h | fixed batch clock, deterministic |
+
+Every number above regenerates bit-for-bit: `make report` (CI re-runs it
+and fails on any diff). Numbers enter this repo only through
+regeneration, never by hand.
+
+## Quickstart
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+make test          # 68 tests — matcher ground truth, stopping rules, API, audit
+make run           # engine on :8000
+make console       # console on :5173  (or: open the deployed site)
+```
+
+No keys needed. The optional LLM assist (see below) is off by default —
+the deterministic rules brain runs everything, replayable bit-for-bit.
+
+## The loop, in one screen
+
+1. **Ingest** — the books ledger (what the merchant thinks happened) vs
+   the rail's settlement file (what actually paid). Razorpay-style shape:
+   order_ref, UTR, settled_date, gross/net/fee. Integer paise only.
+2. **Match** — deterministic, no LLM: order refs pair, fee must match the
+   published schedule (2%, floor ₹2, cap ₹500), net must reconcile with
+   gross − fee, currencies must agree, settle lag must sit inside the T+1
+   SLA. Everything else becomes a break with evidence.
+3. **Diagnose** — six-class taxonomy with severity and evidence derived
+   from the records themselves.
+4. **Remediate** — each class maps to a runbook (RBT-01…06) with five
+   hard stopping rules:
+
+| rule | what it prevents |
+|---|---|
+| S1 — ≥ ₹50,000 always pages a human | silent large-value auto-actions |
+| S2 — currency mismatch never auto-acts | unrecoverable wrong-FX write-backs |
+| S3 — max 5 auto-resolutions per batch | runaway automation |
+| S4 — one automated action per incident, rejected proposals never re-proposed | unreviewed chains |
+| S5 — proposals only, never silent writes | unapproved journal edits |
+
+5. **Page a human** — in the console, you are the desk: approve or reject
+   any proposed action on the incident page. Your decision is appended to
+   the audit log as a `human` event.
+6. **Postmortem** — match rate, resolution rate, MTTR, the honest
+   could-not-resolve list with reasons, and what we'd change next.
+
+## Where AI is (and is not)
+
+The LLM is optional, bounded and labeled. With a key set
+(`GROQ_API_KEY` / `GEMINI_API_KEY` / `OPENAI_API_KEY`, Groq and Gemini
+have free tiers), it writes one sentence of root-cause hypothesis per
+unresolved break — always prefixed `AI-suggested:`, always overridable,
+never in the matching path, never in the remediation path, never
+changing severity or runbook. Without a key, a deterministic rules hint
+is used and the label says `rules`. Any error falls back to rules; the
+pipeline never fails because of the LLM.
+
+## Layout
+
+```
+settleops/            the engine package
+  generator.py        synthetic two-source data, ground truth by construction
+  matcher.py          deterministic matching, graded evidence
+  taxonomy.py         six break classes → severity + runbook
+  runbooks.py         RBT-01…06 + the five stopping rules
+  pipeline.py         the one loop + human_decide() (the only money gate)
+  audit.py            append-only incident log (JSONL, replayable)
+  llm.py              optional labeled diagnosis assist
+  postmortem.py       the SRE artifact
+  api.py              FastAPI service
+api/index.py          Vercel serverless entry
+web/                  the console (React + Vite + Tailwind)
+tests/                68 tests incl. planted-truth matcher proofs
+results/              batch_report.json + postmortem.md (regeneration-only)
+data/                 incident_log.jsonl (regeneration-only)
+docs/PITCH.md         the walkthrough in plain language
+docs/FORM_ANSWERS.md  submission form answers, claim → evidence
+DEPLOY.md             local + Vercel (and why not Render/Railway)
+```
+
+## Deploy
+
+See **DEPLOY.md**. One command, free tier, and the URL does not sleep:
+static assets are always-on, the Python function wakes per request
+(~1-2s cold start, with an honest loading state in the console). Render
+and Railway free tiers spin down after 15 idle minutes and take ~50s to
+wake — a judge clicking your link sees a dead page. That is why Vercel.
+
+## Limits (honest)
+
+- Data is synthetic by design (the brief asks for 50+ records; we ship 66
+  with planted ground truth). No real merchant data anywhere.
+- The rail is a Razorpay-shaped settlement report in test-mode style; no
+  live keys, no real money, no network calls without an LLM key.
+- On serverless, human decisions persist for the life of the warm
+  instance (the audit event is still recorded); locally, the whole batch
+  is in-memory and deterministic per seed.
+- The matcher handles the six planted classes plus the defensive branches;
+  a production system needs fuzzy matching (names, partial refs) and a
+  real persistence layer. What's here is the honest core loop.
+
+## License
+
+MIT — see LICENSE.

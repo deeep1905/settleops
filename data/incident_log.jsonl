@@ -1,0 +1,54 @@
+{"actor": "engine", "detail": "batch R42 opened \u2014 66 books rows vs 66 settlement rows", "incident_id": null, "kind": "BATCH_OPENED", "ts": "2026-08-30T09:15:00"}
+{"actor": "engine", "detail": "TIMING_GAP on ord_420055 \u2014 \u20b929,211 at stake", "incident_id": "INC-0001", "kind": "BREAK_DETECTED", "ts": "2026-08-30T09:16:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-01 \u00b7 books dated 2026-08-26, rail settled 2026-08-28 (T+2, window T+3)", "incident_id": "INC-0001", "kind": "DIAGNOSED", "ts": "2026-08-30T09:16:00"}
+{"actor": "runbook", "detail": "RBT-01 started for ord_420055", "incident_id": "INC-0001", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T09:17:00"}
+{"actor": "runbook", "detail": "settle lag T+2 within window T+3 \u2014 resolved by re-check", "incident_id": "INC-0001", "kind": "AUTO_RESOLVED", "ts": "2026-08-30T10:03:00"}
+{"actor": "engine", "detail": "TIMING_GAP on ord_420056 \u2014 \u20b934,419 at stake", "incident_id": "INC-0002", "kind": "BREAK_DETECTED", "ts": "2026-08-30T10:04:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-01 \u00b7 books dated 2026-08-19, rail settled 2026-08-22 (T+3, window T+3)", "incident_id": "INC-0002", "kind": "DIAGNOSED", "ts": "2026-08-30T10:04:00"}
+{"actor": "runbook", "detail": "RBT-01 started for ord_420056", "incident_id": "INC-0002", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T10:05:00"}
+{"actor": "runbook", "detail": "settle lag T+3 within window T+3 \u2014 resolved by re-check", "incident_id": "INC-0002", "kind": "AUTO_RESOLVED", "ts": "2026-08-30T10:51:00"}
+{"actor": "engine", "detail": "TIMING_GAP on ord_420057 \u2014 \u20b98,430 at stake", "incident_id": "INC-0003", "kind": "BREAK_DETECTED", "ts": "2026-08-30T10:52:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-01 \u00b7 books dated 2026-08-15, rail settled 2026-08-21 (T+6, window T+3)", "incident_id": "INC-0003", "kind": "DIAGNOSED", "ts": "2026-08-30T10:52:00"}
+{"actor": "runbook", "detail": "RBT-01 started for ord_420057", "incident_id": "INC-0003", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T10:53:00"}
+{"actor": "runbook", "detail": "settle lag T+6 outside window T+3", "incident_id": "INC-0003", "kind": "RECHECK_FAILED", "ts": "2026-08-30T10:54:00"}
+{"actor": "runbook", "detail": "timing gap beyond window \u2014 ticket for finance desk", "incident_id": "INC-0003", "kind": "ESCALATED", "ts": "2026-08-30T10:55:00"}
+{"actor": "engine", "detail": "AMOUNT_DRIFT on ord_420058 \u2014 \u20b915,725 at stake", "incident_id": "INC-0004", "kind": "BREAK_DETECTED", "ts": "2026-08-30T10:56:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-02 \u00b7 books \u20b915,725 gross, rail net \u20b915,454 \u2014 unexplained delta \u20b944 (4350 paise)", "incident_id": "INC-0004", "kind": "DIAGNOSED", "ts": "2026-08-30T10:56:00"}
+{"actor": "runbook", "detail": "RBT-02 started for ord_420058", "incident_id": "INC-0004", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T10:57:00"}
+{"actor": "engine", "detail": "proposed: journal adjustment of \u20b943.50 (credit) against UTR04200058 \u2014 requires human approval (S5)", "incident_id": "INC-0004", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T10:58:00"}
+{"actor": "engine", "detail": "AMOUNT_DRIFT on ord_420059 \u2014 \u20b92,378 at stake", "incident_id": "INC-0005", "kind": "BREAK_DETECTED", "ts": "2026-08-30T10:59:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-02 \u00b7 books \u20b92,378 gross, rail net \u20b92,259 \u2014 unexplained delta \u20b9-71 (-7100 paise)", "incident_id": "INC-0005", "kind": "DIAGNOSED", "ts": "2026-08-30T10:59:00"}
+{"actor": "runbook", "detail": "RBT-02 started for ord_420059", "incident_id": "INC-0005", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:00:00"}
+{"actor": "engine", "detail": "proposed: journal adjustment of \u20b971.00 (debit) against UTR04200059 \u2014 requires human approval (S5)", "incident_id": "INC-0005", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:01:00"}
+{"actor": "engine", "detail": "MISSING_ENTRY on ord_420060 \u2014 \u20b930,461 at stake", "incident_id": "INC-0006", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:02:00"}
+{"actor": "engine", "detail": "severity SEV-2 \u00b7 runbook RBT-03 \u00b7 books recorded order ord_420060 (\u20b930,461 on 2026-08-21); no settlement row exists on the rail side", "incident_id": "INC-0006", "kind": "DIAGNOSED", "ts": "2026-08-30T11:02:00"}
+{"actor": "runbook", "detail": "RBT-03 started for ord_420060", "incident_id": "INC-0006", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:03:00"}
+{"actor": "runbook", "detail": "missing entry \u2014 page finance desk; draft prepared but never auto-written", "incident_id": "INC-0006", "kind": "HUMAN_PAGED", "ts": "2026-08-30T11:04:00"}
+{"actor": "engine", "detail": "proposed: draft settlement-entry for ord_420060 (\u20b930,461) and confirm with the rail", "incident_id": "INC-0006", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:05:00"}
+{"actor": "engine", "detail": "MISSING_ENTRY on ord_420061 \u2014 \u20b929,164 at stake", "incident_id": "INC-0007", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:06:00"}
+{"actor": "engine", "detail": "severity SEV-2 \u00b7 runbook RBT-03 \u00b7 books recorded order ord_420061 (\u20b929,164 on 2026-08-12); no settlement row exists on the rail side", "incident_id": "INC-0007", "kind": "DIAGNOSED", "ts": "2026-08-30T11:06:00"}
+{"actor": "runbook", "detail": "RBT-03 started for ord_420061", "incident_id": "INC-0007", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:07:00"}
+{"actor": "runbook", "detail": "missing entry \u2014 page finance desk; draft prepared but never auto-written", "incident_id": "INC-0007", "kind": "HUMAN_PAGED", "ts": "2026-08-30T11:08:00"}
+{"actor": "engine", "detail": "proposed: draft settlement-entry for ord_420061 (\u20b929,164) and confirm with the rail", "incident_id": "INC-0007", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:09:00"}
+{"actor": "engine", "detail": "DUPLICATE_CHARGE on ord_420062 \u2014 \u20b95,052 at stake", "incident_id": "INC-0008", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:10:00"}
+{"actor": "engine", "detail": "severity SEV-2 \u00b7 runbook RBT-04 \u00b7 rail settled ord_420062 twice (UTR04200062, UTR04200062D); books recorded it once", "incident_id": "INC-0008", "kind": "DIAGNOSED", "ts": "2026-08-30T11:10:00"}
+{"actor": "runbook", "detail": "RBT-04 started for ord_420062", "incident_id": "INC-0008", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:11:00"}
+{"actor": "runbook", "detail": "duplicate charge detected \u2014 page desk", "incident_id": "INC-0008", "kind": "HUMAN_PAGED", "ts": "2026-08-30T11:12:00"}
+{"actor": "engine", "detail": "proposed: reversal request for duplicate settlement UTR04200062D (\u20b94,950.96 net)", "incident_id": "INC-0008", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:13:00"}
+{"actor": "engine", "detail": "DUPLICATE_CHARGE on ord_420063 \u2014 \u20b941,759 at stake", "incident_id": "INC-0009", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:14:00"}
+{"actor": "engine", "detail": "severity SEV-2 \u00b7 runbook RBT-04 \u00b7 rail settled ord_420063 twice (UTR04200063, UTR04200063D); books recorded it once", "incident_id": "INC-0009", "kind": "DIAGNOSED", "ts": "2026-08-30T11:14:00"}
+{"actor": "runbook", "detail": "RBT-04 started for ord_420063", "incident_id": "INC-0009", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:15:00"}
+{"actor": "runbook", "detail": "duplicate charge detected \u2014 page desk", "incident_id": "INC-0009", "kind": "HUMAN_PAGED", "ts": "2026-08-30T11:16:00"}
+{"actor": "engine", "detail": "proposed: reversal request for duplicate settlement UTR04200063D (\u20b941,259.00 net)", "incident_id": "INC-0009", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:17:00"}
+{"actor": "engine", "detail": "FEE_MISMATCH on ord_420064 \u2014 \u20b932,007 at stake", "incident_id": "INC-0010", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:18:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-05 \u00b7 rail charged fee \u20b9515.00; published schedule says \u20b9500.00 for this gross", "incident_id": "INC-0010", "kind": "DIAGNOSED", "ts": "2026-08-30T11:18:00"}
+{"actor": "runbook", "detail": "RBT-05 started for ord_420064", "incident_id": "INC-0010", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:19:00"}
+{"actor": "engine", "detail": "proposed: reclassify \u20b915.00 fee variance on UTR04200064 to fee-expense (schedule delta) \u2014 requires human approval (S5)", "incident_id": "INC-0010", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:20:00"}
+{"actor": "engine", "detail": "FEE_MISMATCH on ord_420065 \u2014 \u20b96,117 at stake", "incident_id": "INC-0011", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:21:00"}
+{"actor": "engine", "detail": "severity SEV-3 \u00b7 runbook RBT-05 \u00b7 rail charged fee \u20b9115.34; published schedule says \u20b9122.34 for this gross", "incident_id": "INC-0011", "kind": "DIAGNOSED", "ts": "2026-08-30T11:21:00"}
+{"actor": "runbook", "detail": "RBT-05 started for ord_420065", "incident_id": "INC-0011", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:22:00"}
+{"actor": "engine", "detail": "proposed: reclassify \u20b97.00 fee variance on UTR04200065 to fee-expense (schedule delta) \u2014 requires human approval (S5)", "incident_id": "INC-0011", "kind": "ACTION_PROPOSED", "ts": "2026-08-30T11:23:00"}
+{"actor": "engine", "detail": "CURRENCY_MISMATCH on ord_420066 \u2014 \u20b913,827 at stake", "incident_id": "INC-0012", "kind": "BREAK_DETECTED", "ts": "2026-08-30T11:24:00"}
+{"actor": "engine", "detail": "severity SEV-1 \u00b7 runbook RBT-06 \u00b7 books recorded INR, rail settled USD for order ord_420066", "incident_id": "INC-0012", "kind": "DIAGNOSED", "ts": "2026-08-30T11:24:00"}
+{"actor": "runbook", "detail": "RBT-06 started for ord_420066", "incident_id": "INC-0012", "kind": "RUNBOOK_STARTED", "ts": "2026-08-30T11:25:00"}
+{"actor": "runbook", "detail": "amount currency risk \u2014 stopping rule S1/S2: no auto-action", "incident_id": "INC-0012", "kind": "HUMAN_PAGED", "ts": "2026-08-30T11:26:00"}

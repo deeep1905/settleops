@@ -1,0 +1,17 @@
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# web
+web/node_modules/
+web/dist/
+
+# env — keys never land in the repo
+.env
+
+# editor/os
+.DS_Store
+*.log
+*.tsbuildinfo

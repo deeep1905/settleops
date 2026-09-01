@@ -1,0 +1,650 @@
+{
+ "status": "ok",
+ "batch_id": "R42",
+ "seed": 42,
+ "opened_at": "2026-08-30T09:15:00",
+ "counts": {
+  "books": 66,
+  "settlements": 66,
+  "matched": 54,
+  "incidents": 12
+ },
+ "match_rate": 81.8,
+ "metrics": {
+  "match_rate": 81.8,
+  "incidents_total": 12,
+  "auto_resolved": 2,
+  "awaiting_human": 9,
+  "open_or_scheduled": 1,
+  "paged": 5,
+  "sev1": 1,
+  "sev2": 4,
+  "sev3": 7,
+  "mttr_hours_auto": 0.77
+ },
+ "incidents": [
+  {
+   "id": "INC-0001",
+   "break_class": "TIMING_GAP",
+   "severity": "SEV-3",
+   "books_id": "B055",
+   "settle_id": "S055",
+   "order_ref": "ord_420055",
+   "amount_paise": 2921100,
+   "currency": "INR",
+   "status": "RESOLVED",
+   "runbook": "RBT-01",
+   "proposed_action": null,
+   "action_state": "NONE",
+   "cause_hint": "Rail settlement lag \u2014 typically a payout-batch cutoff or weekend/holiday shift, not a lost payment.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T09:16:00",
+   "resolved_at": "2026-08-30T10:02:00",
+   "resolve_reason": "auto: timing gap inside settlement window",
+   "events": [
+    {
+     "ts": "2026-08-30T09:16:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0001",
+     "detail": "TIMING_GAP on ord_420055 \u2014 \u20b929,211 at stake"
+    },
+    {
+     "ts": "2026-08-30T09:16:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0001",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-01 \u00b7 books dated 2026-08-26, rail settled 2026-08-28 (T+2, window T+3)"
+    },
+    {
+     "ts": "2026-08-30T09:17:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0001",
+     "detail": "RBT-01 started for ord_420055"
+    },
+    {
+     "ts": "2026-08-30T10:03:00",
+     "kind": "AUTO_RESOLVED",
+     "actor": "runbook",
+     "incident_id": "INC-0001",
+     "detail": "settle lag T+2 within window T+3 \u2014 resolved by re-check"
+    }
+   ]
+  },
+  {
+   "id": "INC-0002",
+   "break_class": "TIMING_GAP",
+   "severity": "SEV-3",
+   "books_id": "B056",
+   "settle_id": "S056",
+   "order_ref": "ord_420056",
+   "amount_paise": 3441900,
+   "currency": "INR",
+   "status": "RESOLVED",
+   "runbook": "RBT-01",
+   "proposed_action": null,
+   "action_state": "NONE",
+   "cause_hint": "Rail settlement lag \u2014 typically a payout-batch cutoff or weekend/holiday shift, not a lost payment.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T10:04:00",
+   "resolved_at": "2026-08-30T10:50:00",
+   "resolve_reason": "auto: timing gap inside settlement window",
+   "events": [
+    {
+     "ts": "2026-08-30T10:04:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0002",
+     "detail": "TIMING_GAP on ord_420056 \u2014 \u20b934,419 at stake"
+    },
+    {
+     "ts": "2026-08-30T10:04:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0002",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-01 \u00b7 books dated 2026-08-19, rail settled 2026-08-22 (T+3, window T+3)"
+    },
+    {
+     "ts": "2026-08-30T10:05:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0002",
+     "detail": "RBT-01 started for ord_420056"
+    },
+    {
+     "ts": "2026-08-30T10:51:00",
+     "kind": "AUTO_RESOLVED",
+     "actor": "runbook",
+     "incident_id": "INC-0002",
+     "detail": "settle lag T+3 within window T+3 \u2014 resolved by re-check"
+    }
+   ]
+  },
+  {
+   "id": "INC-0003",
+   "break_class": "TIMING_GAP",
+   "severity": "SEV-3",
+   "books_id": "B057",
+   "settle_id": "S057",
+   "order_ref": "ord_420057",
+   "amount_paise": 843000,
+   "currency": "INR",
+   "status": "TICKET",
+   "runbook": "RBT-01",
+   "proposed_action": null,
+   "action_state": "NONE",
+   "cause_hint": "Rail settlement lag \u2014 typically a payout-batch cutoff or weekend/holiday shift, not a lost payment.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T10:52:00",
+   "resolved_at": null,
+   "resolve_reason": "auto: settle beyond T+3 window, ticketed",
+   "events": [
+    {
+     "ts": "2026-08-30T10:52:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0003",
+     "detail": "TIMING_GAP on ord_420057 \u2014 \u20b98,430 at stake"
+    },
+    {
+     "ts": "2026-08-30T10:52:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0003",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-01 \u00b7 books dated 2026-08-15, rail settled 2026-08-21 (T+6, window T+3)"
+    },
+    {
+     "ts": "2026-08-30T10:53:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0003",
+     "detail": "RBT-01 started for ord_420057"
+    },
+    {
+     "ts": "2026-08-30T10:54:00",
+     "kind": "RECHECK_FAILED",
+     "actor": "runbook",
+     "incident_id": "INC-0003",
+     "detail": "settle lag T+6 outside window T+3"
+    },
+    {
+     "ts": "2026-08-30T10:55:00",
+     "kind": "ESCALATED",
+     "actor": "runbook",
+     "incident_id": "INC-0003",
+     "detail": "timing gap beyond window \u2014 ticket for finance desk"
+    }
+   ]
+  },
+  {
+   "id": "INC-0004",
+   "break_class": "AMOUNT_DRIFT",
+   "severity": "SEV-3",
+   "books_id": "B058",
+   "settle_id": "S058",
+   "order_ref": "ord_420058",
+   "amount_paise": 1572500,
+   "currency": "INR",
+   "status": "PROPOSED",
+   "runbook": "RBT-02",
+   "proposed_action": "journal adjustment of \u20b943.50 (credit) against UTR04200058",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "Small unexplained delta \u2014 usually a partial refund, a GST rounding difference, or an incomplete adjustment entry.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T10:56:00",
+   "resolved_at": null,
+   "resolve_reason": "proposed adjustment awaiting human",
+   "events": [
+    {
+     "ts": "2026-08-30T10:56:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0004",
+     "detail": "AMOUNT_DRIFT on ord_420058 \u2014 \u20b915,725 at stake"
+    },
+    {
+     "ts": "2026-08-30T10:56:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0004",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-02 \u00b7 books \u20b915,725 gross, rail net \u20b915,454 \u2014 unexplained delta \u20b944 (4350 paise)"
+    },
+    {
+     "ts": "2026-08-30T10:57:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0004",
+     "detail": "RBT-02 started for ord_420058"
+    },
+    {
+     "ts": "2026-08-30T10:58:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0004",
+     "detail": "proposed: journal adjustment of \u20b943.50 (credit) against UTR04200058 \u2014 requires human approval (S5)"
+    }
+   ]
+  },
+  {
+   "id": "INC-0005",
+   "break_class": "AMOUNT_DRIFT",
+   "severity": "SEV-3",
+   "books_id": "B059",
+   "settle_id": "S059",
+   "order_ref": "ord_420059",
+   "amount_paise": 237800,
+   "currency": "INR",
+   "status": "PROPOSED",
+   "runbook": "RBT-02",
+   "proposed_action": "journal adjustment of \u20b971.00 (debit) against UTR04200059",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "Small unexplained delta \u2014 usually a partial refund, a GST rounding difference, or an incomplete adjustment entry.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T10:59:00",
+   "resolved_at": null,
+   "resolve_reason": "proposed adjustment awaiting human",
+   "events": [
+    {
+     "ts": "2026-08-30T10:59:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0005",
+     "detail": "AMOUNT_DRIFT on ord_420059 \u2014 \u20b92,378 at stake"
+    },
+    {
+     "ts": "2026-08-30T10:59:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0005",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-02 \u00b7 books \u20b92,378 gross, rail net \u20b92,259 \u2014 unexplained delta \u20b9-71 (-7100 paise)"
+    },
+    {
+     "ts": "2026-08-30T11:00:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0005",
+     "detail": "RBT-02 started for ord_420059"
+    },
+    {
+     "ts": "2026-08-30T11:01:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0005",
+     "detail": "proposed: journal adjustment of \u20b971.00 (debit) against UTR04200059 \u2014 requires human approval (S5)"
+    }
+   ]
+  },
+  {
+   "id": "INC-0006",
+   "break_class": "MISSING_ENTRY",
+   "severity": "SEV-2",
+   "books_id": "B060",
+   "settle_id": null,
+   "order_ref": "ord_420060",
+   "amount_paise": 3046100,
+   "currency": "INR",
+   "status": "PAGED",
+   "runbook": "RBT-03",
+   "proposed_action": "draft settlement-entry for ord_420060 (\u20b930,461) and confirm with the rail",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "One side never recorded the money \u2014 either the rail payout was held or the books entry was skipped during close.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:02:00",
+   "resolved_at": null,
+   "resolve_reason": "paged: unrecorded money needs human entry",
+   "events": [
+    {
+     "ts": "2026-08-30T11:02:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0006",
+     "detail": "MISSING_ENTRY on ord_420060 \u2014 \u20b930,461 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:02:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0006",
+     "detail": "severity SEV-2 \u00b7 runbook RBT-03 \u00b7 books recorded order ord_420060 (\u20b930,461 on 2026-08-21); no settlement row exists on the rail side"
+    },
+    {
+     "ts": "2026-08-30T11:03:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0006",
+     "detail": "RBT-03 started for ord_420060"
+    },
+    {
+     "ts": "2026-08-30T11:04:00",
+     "kind": "HUMAN_PAGED",
+     "actor": "runbook",
+     "incident_id": "INC-0006",
+     "detail": "missing entry \u2014 page finance desk; draft prepared but never auto-written"
+    },
+    {
+     "ts": "2026-08-30T11:05:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0006",
+     "detail": "proposed: draft settlement-entry for ord_420060 (\u20b930,461) and confirm with the rail"
+    }
+   ]
+  },
+  {
+   "id": "INC-0007",
+   "break_class": "MISSING_ENTRY",
+   "severity": "SEV-2",
+   "books_id": "B061",
+   "settle_id": null,
+   "order_ref": "ord_420061",
+   "amount_paise": 2916400,
+   "currency": "INR",
+   "status": "PAGED",
+   "runbook": "RBT-03",
+   "proposed_action": "draft settlement-entry for ord_420061 (\u20b929,164) and confirm with the rail",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "One side never recorded the money \u2014 either the rail payout was held or the books entry was skipped during close.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:06:00",
+   "resolved_at": null,
+   "resolve_reason": "paged: unrecorded money needs human entry",
+   "events": [
+    {
+     "ts": "2026-08-30T11:06:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0007",
+     "detail": "MISSING_ENTRY on ord_420061 \u2014 \u20b929,164 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:06:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0007",
+     "detail": "severity SEV-2 \u00b7 runbook RBT-03 \u00b7 books recorded order ord_420061 (\u20b929,164 on 2026-08-12); no settlement row exists on the rail side"
+    },
+    {
+     "ts": "2026-08-30T11:07:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0007",
+     "detail": "RBT-03 started for ord_420061"
+    },
+    {
+     "ts": "2026-08-30T11:08:00",
+     "kind": "HUMAN_PAGED",
+     "actor": "runbook",
+     "incident_id": "INC-0007",
+     "detail": "missing entry \u2014 page finance desk; draft prepared but never auto-written"
+    },
+    {
+     "ts": "2026-08-30T11:09:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0007",
+     "detail": "proposed: draft settlement-entry for ord_420061 (\u20b929,164) and confirm with the rail"
+    }
+   ]
+  },
+  {
+   "id": "INC-0008",
+   "break_class": "DUPLICATE_CHARGE",
+   "severity": "SEV-2",
+   "books_id": "B062",
+   "settle_id": "S062",
+   "order_ref": "ord_420062",
+   "amount_paise": 505200,
+   "currency": "INR",
+   "status": "PAGED",
+   "runbook": "RBT-04",
+   "proposed_action": "reversal request for duplicate settlement UTR04200062D (\u20b94,950.96 net)",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "The rail settled the same order twice \u2014 retry storm or duplicate webhook; one credit needs reversal.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:10:00",
+   "resolved_at": null,
+   "resolve_reason": "paged: duplicate money needs human reversal",
+   "events": [
+    {
+     "ts": "2026-08-30T11:10:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0008",
+     "detail": "DUPLICATE_CHARGE on ord_420062 \u2014 \u20b95,052 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:10:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0008",
+     "detail": "severity SEV-2 \u00b7 runbook RBT-04 \u00b7 rail settled ord_420062 twice (UTR04200062, UTR04200062D); books recorded it once"
+    },
+    {
+     "ts": "2026-08-30T11:11:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0008",
+     "detail": "RBT-04 started for ord_420062"
+    },
+    {
+     "ts": "2026-08-30T11:12:00",
+     "kind": "HUMAN_PAGED",
+     "actor": "runbook",
+     "incident_id": "INC-0008",
+     "detail": "duplicate charge detected \u2014 page desk"
+    },
+    {
+     "ts": "2026-08-30T11:13:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0008",
+     "detail": "proposed: reversal request for duplicate settlement UTR04200062D (\u20b94,950.96 net)"
+    }
+   ]
+  },
+  {
+   "id": "INC-0009",
+   "break_class": "DUPLICATE_CHARGE",
+   "severity": "SEV-2",
+   "books_id": "B063",
+   "settle_id": "S063",
+   "order_ref": "ord_420063",
+   "amount_paise": 4175900,
+   "currency": "INR",
+   "status": "PAGED",
+   "runbook": "RBT-04",
+   "proposed_action": "reversal request for duplicate settlement UTR04200063D (\u20b941,259.00 net)",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "The rail settled the same order twice \u2014 retry storm or duplicate webhook; one credit needs reversal.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:14:00",
+   "resolved_at": null,
+   "resolve_reason": "paged: duplicate money needs human reversal",
+   "events": [
+    {
+     "ts": "2026-08-30T11:14:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0009",
+     "detail": "DUPLICATE_CHARGE on ord_420063 \u2014 \u20b941,759 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:14:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0009",
+     "detail": "severity SEV-2 \u00b7 runbook RBT-04 \u00b7 rail settled ord_420063 twice (UTR04200063, UTR04200063D); books recorded it once"
+    },
+    {
+     "ts": "2026-08-30T11:15:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0009",
+     "detail": "RBT-04 started for ord_420063"
+    },
+    {
+     "ts": "2026-08-30T11:16:00",
+     "kind": "HUMAN_PAGED",
+     "actor": "runbook",
+     "incident_id": "INC-0009",
+     "detail": "duplicate charge detected \u2014 page desk"
+    },
+    {
+     "ts": "2026-08-30T11:17:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0009",
+     "detail": "proposed: reversal request for duplicate settlement UTR04200063D (\u20b941,259.00 net)"
+    }
+   ]
+  },
+  {
+   "id": "INC-0010",
+   "break_class": "FEE_MISMATCH",
+   "severity": "SEV-3",
+   "books_id": "B064",
+   "settle_id": "S064",
+   "order_ref": "ord_420064",
+   "amount_paise": 3200700,
+   "currency": "INR",
+   "status": "PROPOSED",
+   "runbook": "RBT-05",
+   "proposed_action": "reclassify \u20b915.00 fee variance on UTR04200064 to fee-expense (schedule delta)",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "Applied fee differs from the published schedule \u2014 often an MDR-tier change or a manually-overridden charge.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:18:00",
+   "resolved_at": null,
+   "resolve_reason": "proposed reclass awaiting human",
+   "events": [
+    {
+     "ts": "2026-08-30T11:18:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0010",
+     "detail": "FEE_MISMATCH on ord_420064 \u2014 \u20b932,007 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:18:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0010",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-05 \u00b7 rail charged fee \u20b9515.00; published schedule says \u20b9500.00 for this gross"
+    },
+    {
+     "ts": "2026-08-30T11:19:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0010",
+     "detail": "RBT-05 started for ord_420064"
+    },
+    {
+     "ts": "2026-08-30T11:20:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0010",
+     "detail": "proposed: reclassify \u20b915.00 fee variance on UTR04200064 to fee-expense (schedule delta) \u2014 requires human approval (S5)"
+    }
+   ]
+  },
+  {
+   "id": "INC-0011",
+   "break_class": "FEE_MISMATCH",
+   "severity": "SEV-3",
+   "books_id": "B065",
+   "settle_id": "S065",
+   "order_ref": "ord_420065",
+   "amount_paise": 611700,
+   "currency": "INR",
+   "status": "PROPOSED",
+   "runbook": "RBT-05",
+   "proposed_action": "reclassify \u20b97.00 fee variance on UTR04200065 to fee-expense (schedule delta)",
+   "action_state": "PENDING_APPROVAL",
+   "cause_hint": "Applied fee differs from the published schedule \u2014 often an MDR-tier change or a manually-overridden charge.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:21:00",
+   "resolved_at": null,
+   "resolve_reason": "proposed reclass awaiting human",
+   "events": [
+    {
+     "ts": "2026-08-30T11:21:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0011",
+     "detail": "FEE_MISMATCH on ord_420065 \u2014 \u20b96,117 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:21:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0011",
+     "detail": "severity SEV-3 \u00b7 runbook RBT-05 \u00b7 rail charged fee \u20b9115.34; published schedule says \u20b9122.34 for this gross"
+    },
+    {
+     "ts": "2026-08-30T11:22:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0011",
+     "detail": "RBT-05 started for ord_420065"
+    },
+    {
+     "ts": "2026-08-30T11:23:00",
+     "kind": "ACTION_PROPOSED",
+     "actor": "engine",
+     "incident_id": "INC-0011",
+     "detail": "proposed: reclassify \u20b97.00 fee variance on UTR04200065 to fee-expense (schedule delta) \u2014 requires human approval (S5)"
+    }
+   ]
+  },
+  {
+   "id": "INC-0012",
+   "break_class": "CURRENCY_MISMATCH",
+   "severity": "SEV-1",
+   "books_id": "B066",
+   "settle_id": "S066",
+   "order_ref": "ord_420066",
+   "amount_paise": 1382700,
+   "currency": "INR",
+   "status": "PAGED",
+   "runbook": "RBT-06",
+   "proposed_action": null,
+   "action_state": "NONE",
+   "cause_hint": "Settlement arrived in another currency \u2014 FX route or rail config error; needs human verification.",
+   "cause_source": "rules",
+   "detected_at": "2026-08-30T11:24:00",
+   "resolved_at": null,
+   "resolve_reason": "stopping-rule: amount or currency requires the human desk",
+   "events": [
+    {
+     "ts": "2026-08-30T11:24:00",
+     "kind": "BREAK_DETECTED",
+     "actor": "engine",
+     "incident_id": "INC-0012",
+     "detail": "CURRENCY_MISMATCH on ord_420066 \u2014 \u20b913,827 at stake"
+    },
+    {
+     "ts": "2026-08-30T11:24:00",
+     "kind": "DIAGNOSED",
+     "actor": "engine",
+     "incident_id": "INC-0012",
+     "detail": "severity SEV-1 \u00b7 runbook RBT-06 \u00b7 books recorded INR, rail settled USD for order ord_420066"
+    },
+    {
+     "ts": "2026-08-30T11:25:00",
+     "kind": "RUNBOOK_STARTED",
+     "actor": "runbook",
+     "incident_id": "INC-0012",
+     "detail": "RBT-06 started for ord_420066"
+    },
+    {
+     "ts": "2026-08-30T11:26:00",
+     "kind": "HUMAN_PAGED",
+     "actor": "runbook",
+     "incident_id": "INC-0012",
+     "detail": "amount currency risk \u2014 stopping rule S1/S2: no auto-action"
+    }
+   ]
+  }
+ ]
+}

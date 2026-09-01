@@ -1,0 +1,42 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  engine:
+    name: engine — tests + regeneration-only proof
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: tests (68)
+        run: pytest tests/ -q
+      - name: regenerate report
+        run: python -m settleops
+      - name: regeneration-only discipline
+        run: |
+          git diff --exit-code results data || {
+            echo "::error::results/ or data/ changed after regeneration — numbers must enter the repo only through regeneration"; exit 1; }
+      - name: audit log validates
+        run: pytest tests/test_engine.py::TestAudit -q
+
+  web:
+    name: console — typecheck + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: install
+        working-directory: web
+        run: npm install
+      - name: build
+        working-directory: web
+        run: npm run build
