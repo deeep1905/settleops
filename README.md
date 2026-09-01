@@ -98,12 +98,16 @@ changing severity or runbook. Without a key, a deterministic rules hint
 is used and the label says `rules`. Any error falls back to rules; the
 pipeline never fails because of the LLM.
 
-## Tally — the companion in the corner
+## Tally — the companion you can pick up
 
-Every view of the console carries a small presence: **Tally**, a
-page-aware chat assistant (⌘K, or the button in the corner). It answers
-questions about the loop, the rules, the live batch and what is waiting
-on you — and it knows which view you are reading.
+Every view of the console carries a small presence: **Tally**, a round
+page-aware chat companion (⌘K, or the ball in the corner). Pick her up
+and put her anywhere on the desk — she drags, remembers where you left
+her, and her chat opens beside wherever she sits. Her face is alive:
+pupils that follow the pointer, a blink on a slow clock, wide eyes while
+being carried, a boing when an answer lands, and the amber break marker
+pulsing on her antenna while she thinks. She knows which view you are
+reading and answers in its context.
 
 Two brains, same contract (`settleops/assistant.py`, rules T1-T5):
 

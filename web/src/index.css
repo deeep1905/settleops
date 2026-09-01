@@ -218,15 +218,68 @@ html[data-theme="dark"] .icon-moon { display: none; }
   border-radius: 4px;
 }
 
-/* tally — the companion's face: eyes that blink, dots that think */
+/* ------------------------------------------------------------------ */
+/* tally — the companion: a round face with a life of its own. The     */
+/* ball bobs, the pupils track the pointer, the blink is on a slow     */
+/* clock, the antenna leans along, and good answers boing.             */
+/* ------------------------------------------------------------------ */
 @keyframes tally-blink {
   0%, 93%, 100% { transform: scaleY(1); }
   96% { transform: scaleY(0.08); }
 }
 .tally-eye {
   animation: tally-blink 5.4s ease-in-out infinite;
+  transform-box: fill-box;
   transform-origin: center;
 }
+.tally-eye-r { animation-delay: 0.15s; } /* the right eye trails a beat */
+
+/* the pupils glide after the pointer */
+.tally-pupil { transition: transform 0.16s ease-out; }
+
+/* the orb breathes — a small bob, paused while it's in hand */
+@keyframes tally-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3.5px); }
+}
+.tally-bob { animation: tally-bob 3.6s ease-in-out infinite; }
+.tally-bob[data-paused="true"] { animation-play-state: paused; }
+
+/* a good answer deserves a boing */
+@keyframes tally-boing {
+  0% { transform: scale(1); }
+  38% { transform: scale(1.14); }
+  72% { transform: scale(0.94); }
+  100% { transform: scale(1); }
+}
+.tally-boing { animation: tally-boing 0.55s cubic-bezier(0.3, 1.4, 0.4, 1); }
+
+/* the antenna leans as the ball moves; while she thinks, it hurries */
+@keyframes tally-wobble {
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+}
+.tally-antenna {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: tally-wobble 3.6s ease-in-out infinite;
+}
+.tally-antenna[data-think="true"] { animation-duration: 0.7s; }
+
+/* thinking — the break marker pulses, like a break on the board */
+@keyframes tally-signal {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.tally-signal { animation: tally-signal 1.5s ease-in-out infinite; }
+
+/* the orb's shadow — a filter, so the ball itself stays perfectly round */
+.tally-orb { filter: drop-shadow(0 6px 14px rgba(16, 19, 23, 0.2)); }
+.tally-orb[data-drag="true"] { filter: drop-shadow(0 18px 30px rgba(16, 19, 23, 0.34)); }
+html[data-theme="dark"] .tally-orb { filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55)); }
+html[data-theme="dark"] .tally-orb[data-drag="true"] { filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.7)); }
+
+/* the thinking dots in the desk */
 @keyframes tally-bounce {
   0%, 64%, 100% { transform: translateY(0); opacity: 0.45; }
   32% { transform: translateY(-3px); opacity: 1; }
@@ -244,6 +297,11 @@ html[data-theme="dark"] .icon-moon { display: none; }
   .menu-in,
   .bar,
   .tally-eye,
+  .tally-pupil,
+  .tally-bob,
+  .tally-boing,
+  .tally-antenna,
+  .tally-signal,
   .tally-dot {
     animation: none;
     transition: none;
