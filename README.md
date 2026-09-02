@@ -102,11 +102,15 @@ pipeline never fails because of the LLM.
 
 Every view of the console carries a small presence: **Tally**, a round
 page-aware chat companion (⌘K, or the ball in the corner). Pick her up
-and put her anywhere on the desk — she drags, remembers where you left
-her, and her chat opens beside wherever she sits. Her face is alive:
-pupils that follow the pointer, a blink on a slow clock, wide eyes while
-being carried, a boing when an answer lands, and the amber break marker
-pulsing on her antenna while she thinks. She knows which view you are
+and put her anywhere on the desk — she drags, leans into the carry, and
+remembers where you left her; her chat opens beside wherever she sits
+and folds away when you walk off. Her face is alive and every
+expression cross-fades rather than snaps: pupils that follow the
+pointer, a blink on a slow clock, wide eyes while being carried, a
+boing when an answer lands, and the amber break marker pulsing on her
+antenna while she thinks. The same diamond is her status light — amber
+when the deterministic brain answers, settled green when the live one
+is on (a 0.6s cross-fade, never a badge). She knows which view you are
 reading and answers in its context.
 
 Two brains, same contract (`settleops/assistant.py`, rules T1-T5):
@@ -125,6 +129,14 @@ Two brains, same contract (`settleops/assistant.py`, rules T1-T5):
   (`groq · <model>` / `regex · 0 tokens`), the same honesty as the
   diagnosis assist. Tally never moves money; it points at the gate.
 
+Answers arrive the way thoughts do — **token by token**
+(`POST /api/chat/stream`): a start frame names the brain, deltas land
+as SSE, a done frame carries the mode and any navigation action. The
+Groq path streams the model's real tokens; the deterministic brains
+type themselves out in small word groups so `/status` lands like a
+thought, not a dump. The one-shot `POST /api/chat` stays as the spare
+tire — the client retries on it if the stream breaks.
+
 ## Layout
 
 ```
@@ -136,9 +148,10 @@ settleops/            the engine package
   pipeline.py         the one loop + human_decide() (the only money gate)
   audit.py            append-only incident log (JSONL, replayable)
   llm.py              optional labeled diagnosis assist
-  assistant.py        Tally — the chat companion (commands → groq → regex)
+  assistant.py        Tally — the chat companion (commands → groq → regex,
+                     streamed token by token)
   postmortem.py       the SRE artifact
-  api.py              FastAPI service (+ /api/chat)
+  api.py              FastAPI service (+ /api/chat, /api/chat/stream)
 api/index.py          Vercel serverless entry
 web/                  the console (React + Vite + Tailwind)
 tests/                97 tests incl. planted-truth matcher proofs

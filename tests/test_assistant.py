@@ -221,3 +221,46 @@ class TestChatEndpoint:
     def test_status_endpoint(self):
         d = client.get("/api/chat/status").json()
         assert d["ok"] and d["llm"] is False and d["model"] is None
+
+
+class TestChatStreamEndpoint:
+    """the streamed twin of /api/chat — same brains, token by token"""
+
+    def _frames(self, content, page="home"):
+        import json as _json
+        r = client.post("/api/chat/stream",
+                        json={"messages": [{"role": "user", "content": content}],
+                              "page": page})
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith("text/event-stream")
+        evs = []
+        for line in r.text.split("\n\n"):
+            line = line.strip()
+            if line.startswith("data:"):
+                evs.append(_json.loads(line[5:].strip()))
+        return evs
+
+    def test_shape_is_start_deltas_done(self):
+        evs = self._frames("/status")
+        kinds = [e["type"] for e in evs]
+        assert kinds[0] == "start" and kinds[-1] == "done"
+        assert kinds.count("delta") > 3            # it really types out
+        assert evs[0]["mode"] == "command"
+        assert evs[-1]["action"] is None
+
+    def test_streamed_answer_equals_the_one_shot(self):
+        text = "".join(e["text"] for e in self._frames("/status")
+                       if e["type"] == "delta")
+        d = client.post("/api/chat",
+                        json={"messages": [{"role": "user", "content": "/status"}],
+                              "page": "home"}).json()
+        assert text == d["reply"]
+
+    def test_freeform_streams_regex_when_offline(self, monkeypatch):
+        for k in ("TALLY_API_KEY", "GROQ_API_KEY", "GEMINI_API_KEY",
+                  "OPENAI_API_KEY"):
+            monkeypatch.delenv(k, raising=False)
+        evs = self._frames("what broke?")
+        assert evs[0]["type"] == "start"
+        assert evs[-1]["type"] == "done" and evs[-1]["mode"] == "regex"
+        assert "".join(e["text"] for e in evs if e["type"] == "delta").strip()

@@ -10,6 +10,7 @@
   GET  /api/log                   — the raw event log
   GET  /api/chat/status           — which brain Tally is on
   POST /api/chat                  — ask Tally (commands → groq → regex)
+  POST /api/chat/stream           — the same answer, token by token (SSE)
 
 State: in-memory per process, deterministic seed on boot. On a serverless
 host each instance boots the same default batch, so the numbers a judge
@@ -18,15 +19,17 @@ for the life of the warm instance and are recorded in the event log.
 """
 from __future__ import annotations
 
+import json
 import os
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from .pipeline import human_decide, run_batch
 from .postmortem import write_postmortem
-from .assistant import tally_reply, tally_status
+from .assistant import tally_reply, tally_status, tally_stream
 
 app = FastAPI(title="SettleOps", version="1.0.0",
               description="The incident console for your books.")
@@ -143,3 +146,28 @@ def chat(body: ChatBody):
     always answers."""
     msgs = [{"role": m.role, "content": m.content} for m in body.messages]
     return _ok(**tally_reply(BATCH, msgs, body.page))
+
+
+@app.post("/api/chat/stream")
+def chat_stream(body: ChatBody):
+    """the same brain order as /api/chat, streamed as server-sent events:
+    a start frame (which brain), delta frames (the answer arriving), a
+    done frame (mode, model, action). The deterministic brains type
+    themselves out in small word groups; the live brain streams its
+    real tokens. The stream never raises — worst case it ends early
+    and the client retries on the one-shot endpoint."""
+    msgs = [{"role": m.role, "content": m.content} for m in body.messages]
+
+    def gen():
+        try:
+            yield from tally_stream(BATCH, msgs, body.page)
+        except Exception:  # the belt under the belt
+            yield _sse_done()
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache",
+                                      "X-Accel-Buffering": "no"})
+
+
+def _sse_done() -> str:
+    return f"data: {json.dumps({'type': 'done', 'mode': 'regex', 'model': None, 'action': None})}\n\n"

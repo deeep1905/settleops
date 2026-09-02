@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 import urllib.request
 
 from .models import BatchReport
@@ -398,6 +399,113 @@ def _trim(messages: list[dict]) -> list[dict]:
         if role in ("user", "assistant") and content.strip():
             out.append({"role": role, "content": content})
     return out
+
+
+# ------------------------------------------------------------------ streaming
+
+def _sse(obj: dict) -> str:
+    return f"data: {json.dumps(obj)}\n\n"
+
+
+def _word_groups(text: str, n: int = 2) -> list[str]:
+    """a finished answer, cut into small word groups — the typewriter
+    feed for the deterministic brains, so /status lands like a thought
+    being typed, not a paragraph dumped on the desk"""
+    toks = re.findall(r"\S+\s*", text)
+    return ["".join(toks[i:i + n]) for i in range(0, len(toks), n)] or [""]
+
+
+def _llm_stream(messages: list[dict], system: str):
+    """the provider's tokens as they arrive — same shape as _llm_chat,
+    but the pipe is open while the model thinks"""
+    prov = _provider()
+    if prov is None:
+        raise RuntimeError("no provider key")
+    key, base, model, _ = prov
+    body = json.dumps({
+        "model": model,
+        "messages": ([{"role": "system", "content": system}] + messages),
+        "max_tokens": 260,
+        "temperature": 0.4,
+        "stream": True,
+    }).encode()
+    req = urllib.request.Request(
+        f"{base}/chat/completions", data=body,
+        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                 "Accept": "text/event-stream"})
+    with urllib.request.urlopen(req, timeout=25) as r:
+        for raw in r:
+            line = raw.decode("utf-8", "replace").strip()
+            if not line.startswith("data:"):
+                continue
+            payload = line[5:].strip()
+            if payload == "[DONE]":
+                return
+            try:
+                d = json.loads(payload)
+            except json.JSONDecodeError:
+                continue
+            try:
+                tok = d["choices"][0]["delta"].get("content")
+            except (KeyError, IndexError, TypeError):
+                continue
+            if tok:
+                yield tok
+
+
+def tally_stream(batch: BatchReport, messages: list[dict], page: str = "home"):
+    """tally_reply, token by token. Yields SSE frames:
+    {"type": "start", "mode", "model"} once, then {"type": "delta",
+    "text"} per chunk, then {"type": "done", "mode", "model", "action"}.
+    Same brain order as tally_reply — commands, then the live brain,
+    then regex — and the same never-raises guarantee: a provider that
+    drops before the first token falls back to regex mid-stream."""
+    page = page if page in PAGES else "home"
+    c = digest(batch)
+    history = _trim(messages if isinstance(messages, list) else [])
+    q = next((m["content"] for m in reversed(history) if m["role"] == "user"), "")
+
+    def typed(text: str, mode: str, model: str | None, action: dict | None):
+        yield _sse({"type": "start", "mode": mode, "model": model})
+        for grp in _word_groups(text):
+            yield _sse({"type": "delta", "text": grp})
+            time.sleep(0.03)
+        yield _sse({"type": "done", "mode": mode, "model": model, "action": action})
+
+    # T1 — commands, the engine's own
+    if q.startswith("/"):
+        cmd = q.split()[0].lower()
+        if cmd == "/reset":
+            yield from typed("clean slate — ask me anything.", "command", None, None)
+        elif cmd in COMMANDS:
+            yield from typed(_command(cmd, c), "command", None, None)
+        else:
+            yield from typed("unknown command — /help lists what i answer cold.",
+                             "command", None, None)
+        return
+
+    # T2 — the live brain, streamed as it thinks
+    prov = _provider()
+    if prov and q.strip():
+        yielded = 0
+        try:
+            yield _sse({"type": "start", "mode": "llm", "model": prov[2]})
+            for tok in _llm_stream(history, system_prompt(page, c)):
+                yield _sse({"type": "delta", "text": tok})
+                yielded += 1
+            yield _sse({"type": "done", "mode": "llm", "model": prov[2], "action": None})
+            return
+        except Exception:
+            if yielded:
+                # the line dropped mid-answer; end it honestly rather
+                # than splice two brains into one reply
+                yield _sse({"type": "done", "mode": "llm", "model": prov[2], "action": None})
+                return
+            # nothing said yet — the deterministic brain takes the desk
+
+    # the always-there brain
+    reply, action = _regex_brain(q.lower(), page, c)
+    yield from typed(reply, "regex", None, action)
 
 
 # ------------------------------------------------------------------ the door

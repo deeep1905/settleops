@@ -7,19 +7,20 @@ import { postJSON, getJSON } from "../lib";
  *
  * A round little presence you can pick up and put anywhere on the desk:
  *   · the ball drags (pointer events, clamped to the viewport, position
- *     remembered in localStorage) and the desk it opens follows it —
- *     above when there's room, below when there isn't, tail always
- *     pointing home
- *   · the face is alive — pupils that track the pointer, a blink on a
- *     slow clock, moods for the moments that matter (thinking while
- *     the engine answers, a boing when it lands, wide eyes in hand)
- *   · two brains, decided by the engine: slash commands answer from
- *     live batch data (zero tokens), free-form goes to groq when a key
- *     exists and to a regex brain when it doesn't
+ *     remembered in localStorage) and leans into the carry; the desk it
+ *     opens follows it — above when there's room, below when there isn't,
+ *     tail always pointing home
+ *   · the face is alive and every change is a cross-fade, never a swap:
+ *     pupils that glide after the pointer, a blink on a slow clock,
+ *     moods for the moments that matter. no clipped corners, no badge —
+ *     the antenna's diamond is the status light, amber when the local
+ *     brain answers and settling to green when the live one is on
+ *   · answers arrive the way thoughts do — token by token. the engine
+ *     streams SSE frames; the deterministic brains type themselves out
+ *     in small word groups, the live brain streams its real tokens, and
+ *     a blinking caret marks the spot while it lands
  * Page-aware throughout: Tally reads the view it's floating over and
- * answers in its context. The amber diamond on the antenna is the break
- * marker from the logo — Tally wears the one thing the console watches
- * for, and it pulses while she thinks. ⌘K toggles, esc closes, the
+ * answers in its context. ⌘K toggles, esc and walking away close, the
  * broom resets.
  */
 
@@ -41,6 +42,11 @@ interface ChatStatus {
   model: string | null;
   commands: string[];
 }
+
+type StreamEvent =
+  | { type: "start"; mode: Msg["mode"]; model: string | null }
+  | { type: "delta"; text: string }
+  | { type: "done"; mode: Msg["mode"]; model: string | null; action: Msg["action"] };
 
 const PAGE_LABEL: Record<View, string> = {
   home: "overview",
@@ -96,8 +102,8 @@ function savePos(p: Pos) {
 
 /* ------------------------------------------------------------------ face */
 
-function TallyFace({ size = 64, mood = "idle", gaze, className = "" }: {
-  size?: number; mood?: Mood; gaze?: { x: number; y: number }; className?: string;
+function TallyFace({ size = 64, mood = "idle", gaze, live, className = "" }: {
+  size?: number; mood?: Mood; gaze?: { x: number; y: number }; live?: boolean; className?: string;
 }) {
   const happy = mood === "happy";
   const think = mood === "think";
@@ -113,13 +119,20 @@ function TallyFace({ size = 64, mood = "idle", gaze, className = "" }: {
     : sad ? { x: 0, y: 1.5 }
     : gaze ?? { x: 0, y: 0 };
 
+  /* moods cross-fade — every shape is always drawn, only the opacity
+     moves, so the face never snaps between expressions */
+  const on = (v: boolean) => (v ? 1 : 0);
+
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden className={`shrink-0 ${className}`}>
       {/* antenna — the amber diamond is the break marker from the logo;
-          it leans with the ball and pulses while she thinks */}
+          it leans with the ball, pulses while she thinks, and is the
+          status light: green when the live brain is on, amber when the
+          deterministic one answers — a settle, never a swap */}
       <g className="tally-antenna" data-think={think}>
         <line x1="32" y1="24" x2="32" y2="13.5" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
-        <path className={think ? "tally-signal" : undefined} d="M32 5.5l4.4 5.2L32 16l-4.4-5.3Z" fill="#FFB224" />
+        <path className="tally-signal" data-think={think} data-live={live ? "true" : undefined}
+              d="M32 5.5l4.4 5.2L32 16l-4.4-5.3Z" />
       </g>
 
       {/* the head — properly round, the one shape a companion should be */}
@@ -127,59 +140,53 @@ function TallyFace({ size = 64, mood = "idle", gaze, className = "" }: {
       {/* a quiet highlight so the ball reads as a ball */}
       <ellipse cx="24" cy="28" rx="7" ry="4" fill="#fff" opacity="0.32" transform="rotate(-20 24 28)" />
 
-      {/* cheeks — amber, faint; fuller when she's pleased */}
-      {!sad && !wide && (
-        <>
-          <circle cx="20.5" cy="43" r="2.7" fill="#FFB224" opacity={happy ? 0.85 : 0.5} />
-          <circle cx="43.5" cy="43" r="2.7" fill="#FFB224" opacity={happy ? 0.85 : 0.5} />
-        </>
-      )}
+      {/* cheeks — amber, faint; fuller when she's pleased, gone when
+          she's wide-eyed or sorry */}
+      <g className="tally-fade" style={{ opacity: happy ? 0.85 : sad || wide ? 0 : 0.5 }}>
+        <circle cx="20.5" cy="43" r="2.7" fill="#FFB224" />
+        <circle cx="43.5" cy="43" r="2.7" fill="#FFB224" />
+      </g>
 
-      {/* the eyes */}
-      {happy ? (
-        /* the squint of a good answer — two arcs */
-        <>
-          <path d="M20.5 37.5q4-5.6 8 0" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" />
-          <path d="M35.5 37.5q4-5.6 8 0" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" />
-        </>
-      ) : wide ? (
-        /* wide — the "where are we going" of being carried */
-        <>
-          <circle cx="24.5" cy="36.5" r="5.7" fill="#fff" stroke="var(--color-ink)" strokeWidth="1.5" />
-          <circle cx="39.5" cy="36.5" r="5.7" fill="#fff" stroke="var(--color-ink)" strokeWidth="1.5" />
-          <circle cx="24.5" cy="37.7" r="2.5" fill="var(--color-ink)" />
-          <circle cx="39.5" cy="37.7" r="2.5" fill="var(--color-ink)" />
-        </>
-      ) : (
-        /* the default — big dark eyes that follow the pointer, and blink */
-        <>
-          <g className="tally-eye">
-            <g className="tally-pupil" style={{ transform: `translate(${p.x}px, ${p.y}px)` }}>
-              <circle cx="24.5" cy="36.5" r="3.7" fill="var(--color-ink)" />
-              <circle cx="25.8" cy="35.2" r="1.05" fill="#fff" opacity="0.9" />
-            </g>
+      {/* the eyes — three expressions, cross-faded */}
+      <g className="tally-fade" style={{ opacity: on(!happy && !wide) }}>
+        {/* the default — big dark eyes that follow the pointer, and blink */}
+        <g className="tally-eye">
+          <g className="tally-pupil" style={{ transform: `translate(${p.x}px, ${p.y}px)` }}>
+            <circle cx="24.5" cy="36.5" r="3.7" fill="var(--color-ink)" />
+            <circle cx="25.8" cy="35.2" r="1.05" fill="#fff" opacity="0.9" />
           </g>
-          <g className="tally-eye tally-eye-r">
-            <g className="tally-pupil" style={{ transform: `translate(${p.x}px, ${p.y}px)` }}>
-              <circle cx="39.5" cy="36.5" r="3.7" fill="var(--color-ink)" />
-              <circle cx="40.8" cy="35.2" r="1.05" fill="#fff" opacity="0.9" />
-            </g>
+        </g>
+        <g className="tally-eye tally-eye-r">
+          <g className="tally-pupil" style={{ transform: `translate(${p.x}px, ${p.y}px)` }}>
+            <circle cx="39.5" cy="36.5" r="3.7" fill="var(--color-ink)" />
+            <circle cx="40.8" cy="35.2" r="1.05" fill="#fff" opacity="0.9" />
           </g>
-        </>
-      )}
+        </g>
+      </g>
+      <g className="tally-fade" style={{ opacity: on(happy) }}>
+        {/* the squint of a good answer — two arcs */}
+        <path d="M20.5 37.5q4-5.6 8 0" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" />
+        <path d="M35.5 37.5q4-5.6 8 0" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" />
+      </g>
+      <g className="tally-fade" style={{ opacity: on(wide) }}>
+        {/* wide — the "where are we going" of being carried */}
+        <circle cx="24.5" cy="36.5" r="5.7" fill="#fff" stroke="var(--color-ink)" strokeWidth="1.5" />
+        <circle cx="39.5" cy="36.5" r="5.7" fill="#fff" stroke="var(--color-ink)" strokeWidth="1.5" />
+        <circle cx="24.5" cy="37.7" r="2.5" fill="var(--color-ink)" />
+        <circle cx="39.5" cy="37.7" r="2.5" fill="var(--color-ink)" />
+      </g>
 
-      {/* the mouth */}
-      {happy ? (
-        <path d="M26 43.5q6 8.2 12 0Z" fill="var(--color-ink)" />
-      ) : wide ? (
-        <circle cx="32" cy="46.5" r="3" fill="none" stroke="var(--color-ink)" strokeWidth="2" />
-      ) : sad ? (
-        <path d="M27 48q5-4.4 10 0" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
-      ) : think ? (
-        <path d="M28.5 46.5h7" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
-      ) : (
-        <path d="M26 44q6 5.2 12 0" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
-      )}
+      {/* the mouth — five expressions, cross-faded */}
+      <path className="tally-fade" style={{ opacity: on(happy) }}
+            d="M26 43.5q6 8.2 12 0Z" fill="var(--color-ink)" />
+      <circle className="tally-fade" style={{ opacity: on(wide) }}
+              cx="32" cy="46.5" r="3" fill="none" stroke="var(--color-ink)" strokeWidth="2" />
+      <path className="tally-fade" style={{ opacity: on(sad) }}
+            d="M27 48q5-4.4 10 0" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
+      <path className="tally-fade" style={{ opacity: on(think) }}
+            d="M28.5 46.5h7" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
+      <path className="tally-fade" style={{ opacity: on(!happy && !wide && !sad && !think) }}
+            d="M26 44q6 5.2 12 0" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
@@ -207,15 +214,18 @@ export function ChatBot({ view, onNavigate }: {
   onNavigate: (v: NavView) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false);          // a round trip is in flight
+  const [streaming, setStreaming] = useState(false); // the answer is arriving
   const [status, setStatus] = useState<ChatStatus | null>(null);
   const [mood, setMood] = useState<Mood>("idle");
   const [pos, setPos] = useState<Pos>(() => loadPos());
   const [vp, setVp] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
   const [gaze, setGaze] = useState({ x: 0, y: 0 });
   const [hint, setHint] = useState(true);
+  const [tilt, setTilt] = useState(0);
 
   const orb = useRef<HTMLButtonElement>(null);
   const orbWrap = useRef<HTMLDivElement>(null);
@@ -225,6 +235,8 @@ export function ChatBot({ view, onNavigate }: {
   const drag = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
   const suppress = useRef(false);
   const moodTimer = useRef<number | undefined>(undefined);
+  const closeTimer = useRef<number | undefined>(undefined);
+  const typeTimer = useRef<number | undefined>(undefined);
   const gazeNext = useRef({ x: 0, y: 0, has: false });
 
   /* a mood that holds for a beat, then settles back to idle */
@@ -285,6 +297,24 @@ export function ChatBot({ view, onNavigate }: {
       .catch(() => setStatus(null));
   }, []);
 
+  /* leave no timer behind */
+  useEffect(() => () => {
+    window.clearTimeout(moodTimer.current);
+    window.clearTimeout(closeTimer.current);
+    window.clearInterval(typeTimer.current);
+  }, []);
+
+  /* a closing desk folds in — a 150ms goodbye, then it's gone. every
+     way out (esc, walking away, the ball itself) goes through here */
+  const close = () => {
+    if (!open || closing) return;
+    setClosing(true);
+    closeTimer.current = window.setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 150);
+  };
+
   /* a desk closes when you walk away — a pointerdown anywhere that isn't
      tally or her panel folds it up */
   useEffect(() => {
@@ -293,50 +323,71 @@ export function ChatBot({ view, onNavigate }: {
       const t = e.target as Node | null;
       if (!t) return;
       if (orbWrap.current?.contains(t) || panel.current?.contains(t)) return;
-      setOpen(false);
+      close();
     };
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
-  }, [open]);
+  }, [open, closing]);
 
   /* ⌘K / ctrl-K toggles, esc closes */
   useEffect(() => {
     const onKey = (e: globalThis.KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen((o) => !o);
+        if (open) close();
+        else { setOpen(true); feel("happy", 800); }
       } else if (e.key === "Escape") {
-        setOpen(false);
+        close();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, closing]);
 
-  /* first open starts with a hello from tally */
+  /* the local typewriter — canned lines land the same way streamed ones
+     do, a couple of characters at a tick */
+  const typeOut = (text: string) => {
+    window.clearInterval(typeTimer.current);
+    setMsgs([{ role: "bot", text: "" }]);
+    setStreaming(true);
+    let i = 0;
+    typeTimer.current = window.setInterval(() => {
+      i = Math.min(text.length, i + 2);
+      const slice = text.slice(0, i);
+      setMsgs((ms) => {
+        if (!ms.length || ms[ms.length - 1].role !== "bot") {
+          return [...ms, { role: "bot", text: slice }];
+        }
+        const c = [...ms];
+        c[c.length - 1] = { ...c[c.length - 1], text: slice };
+        return c;
+      });
+      if (i >= text.length) {
+        window.clearInterval(typeTimer.current);
+        setStreaming(false);
+      }
+    }, 16);
+  };
+
+  /* first open starts with a hello from tally — typed, not dumped */
   useEffect(() => {
     if (open && msgs.length === 0) {
-      setMsgs([{
-        role: "bot",
-        text: `hey — i'm tally, the desk's companion.\ni can see you're on the ${PAGE_LABEL[view]} view, and every number i quote is live from the engine.\npick me up and put me wherever i'm useful — then /status, or tap a chip below.`,
-      }]);
+      typeOut(`hey — i'm tally, the desk's companion.\ni can see you're on the ${PAGE_LABEL[view]} view, and every number i quote is live from the engine.\npick me up and put me wherever i'm useful — then /status, or tap a chip below.`);
       feel("happy", 1200);
     }
     if (open) field.current?.focus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  /* new messages keep the bottom in view */
+  /* new text keeps the bottom in view — while it streams, not just when */
   useEffect(() => {
     const el = scroller.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [msgs, busy]);
+  }, [msgs, busy, streaming]);
 
   const reset = () => {
-    setMsgs([{
-      role: "bot",
-      text: `clean slate.\ni'm still reading the ${PAGE_LABEL[view]} view — ask me anything, or /help for what i know cold.`,
-    }]);
+    typeOut(`clean slate.\ni'm still reading the ${PAGE_LABEL[view]} view — ask me anything, or /help for what i know cold.`);
     setInput("");
     feel("happy", 900);
     field.current?.focus();
@@ -346,6 +397,7 @@ export function ChatBot({ view, onNavigate }: {
     const q = raw.trim();
     if (!q || busy) return;
     if (q.toLowerCase() === "/reset") { reset(); return; }
+    window.clearInterval(typeTimer.current);
 
     const user: Msg = { role: "user", text: q };
     /* the server trims to the last 6 turns — the client just tells the story */
@@ -358,22 +410,74 @@ export function ChatBot({ view, onNavigate }: {
     setBusy(true);
     feel("think");
     try {
-      const d = await postJSON<{
-        reply: string; mode: "command" | "llm" | "regex";
-        model: string | null; action: { label: string; view: NavView } | null;
-      }>("/api/chat", { messages: history, page: view });
-      setMsgs((ms) => [...ms, {
-        role: "bot", text: d.reply, mode: d.mode, model: d.model, action: d.action,
-      }]);
-      feel("happy");
+      const r = await fetch("/api/chat/stream", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ messages: history, page: view }),
+      });
+      if (!r.ok || !r.body) throw new Error("stream refused");
+      const reader = r.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() ?? "";
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data:")) continue;
+          let ev: StreamEvent;
+          try { ev = JSON.parse(line.slice(5).trim()) as StreamEvent; } catch { continue; }
+          if (ev.type === "start") {
+            setMsgs((ms) => [...ms, {
+              role: "bot", text: "", mode: ev.mode, model: ev.model, action: null,
+            }]);
+            setStreaming(true);
+          } else if (ev.type === "delta") {
+            setMsgs((ms) => {
+              if (!ms.length || ms[ms.length - 1].role !== "bot") return ms;
+              const c = [...ms];
+              c[c.length - 1] = { ...c[c.length - 1], text: c[c.length - 1].text + ev.text };
+              return c;
+            });
+          } else if (ev.type === "done") {
+            setMsgs((ms) => {
+              if (!ms.length || ms[ms.length - 1].role !== "bot") return ms;
+              const c = [...ms];
+              c[c.length - 1] = {
+                ...c[c.length - 1], mode: ev.mode, model: ev.model,
+                action: ev.action ?? null,
+              };
+              return c;
+            });
+            setStreaming(false);
+            feel("happy");
+          }
+        }
+      }
     } catch {
-      setMsgs((ms) => [...ms, {
-        role: "bot",
-        text: "the engine isn't answering — run make run and try again. i'll be here.",
-      }]);
-      feel("sad", 2600);
+      /* the stream broke — the one-shot endpoint is the spare tire */
+      try {
+        const d = await postJSON<{
+          reply: string; mode: "command" | "llm" | "regex";
+          model: string | null; action: { label: string; view: NavView } | null;
+        }>("/api/chat", { messages: history, page: view });
+        setMsgs((ms) => [...ms, {
+          role: "bot", text: d.reply, mode: d.mode, model: d.model, action: d.action,
+        }]);
+        feel("happy");
+      } catch {
+        setMsgs((ms) => [...ms, {
+          role: "bot",
+          text: "the engine isn't answering — run make run and try again. i'll be here.",
+        }]);
+        feel("sad", 2600);
+      }
     } finally {
       setBusy(false);
+      setStreaming(false);
     }
   };
 
@@ -402,7 +506,15 @@ export function ChatBot({ view, onNavigate }: {
       window.clearTimeout(moodTimer.current);
       setMood("drag");
     }
-    if (d.moved) setPos(clampPos({ x: d.ox + dx, y: d.oy + dy }));
+    if (d.moved) {
+      setPos(clampPos({ x: d.ox + dx, y: d.oy + dy }));
+      /* she leans into the carry, and settles upright when you pause —
+         a trailing tilt, eased by the wrapper's transition */
+      setTilt((t) => {
+        const v = t * 0.86 + (e.movementX ?? 0) * 0.32;
+        return Math.max(-7, Math.min(7, v));
+      });
+    }
   };
 
   const endDrag = (e: ReactPointerEvent<HTMLButtonElement>) => {
@@ -414,12 +526,15 @@ export function ChatBot({ view, onNavigate }: {
       suppress.current = true;         // the click that follows a drag is not a toggle
       savePos(pos);
       setMood("idle");
+      setTilt(0);
     }
   };
 
   const onOrbClick = () => {
     if (suppress.current) { suppress.current = false; return; }
-    setOpen((o) => !o);
+    if (open) { close(); return; }
+    setOpen(true);
+    feel("happy", 800);                // glad you opened the desk
   };
 
   /* ------------------------------------------- the desk, anchored to tally */
@@ -459,10 +574,22 @@ export function ChatBot({ view, onNavigate }: {
   const tailTop = !onPanel && orbBottom <= py + 20;
   const tailBottom = !onPanel && orbTop >= py + panelH - 20;
 
+  /* while you type, she reads along — the eyes go to the desk, not
+     the pointer */
+  const lookAtDesk = open && input.trim()
+    ? (() => {
+        const dx = px + PW / 2 - (pos.x + ORB / 2);
+        const dy = py + panelH / 2 - (pos.y + ORB / 2);
+        const d = Math.hypot(dx, dy) || 1;
+        return { x: (dx / d) * 1.6, y: (dy / d) * 1.6 };
+      })()
+    : null;
+
   return (
     <>
       {/* ---------------- the companion, wherever you put her ---------------- */}
-      <div ref={orbWrap} className="fixed z-50" style={{ top: pos.y, left: pos.x }}>
+      <div ref={orbWrap} className="tally-tilt fixed z-50"
+           style={{ top: pos.y, left: pos.x, transform: `rotate(${tilt}deg)` }}>
         {hint && !open && mood !== "drag" && (
           <div
             aria-hidden
@@ -484,7 +611,7 @@ export function ChatBot({ view, onNavigate }: {
           aria-label={open ? "close tally" : "ask tally — drag to move"}
           title={open ? "close (esc)" : "tally — drag me anywhere, tap to chat · ⌘K"}
           data-drag={mood === "drag"}
-          className={`tally-orb relative flex size-16 cursor-grab touch-none select-none items-center justify-center rounded-full transition-transform duration-200 active:cursor-grabbing ${
+          className={`tally-orb relative flex size-16 cursor-grab touch-none select-none items-center justify-center rounded-full transition-transform duration-200 hover:scale-[1.05] active:cursor-grabbing ${
             mood === "drag" ? "scale-[1.08]" : ""
           }`}
         >
@@ -493,16 +620,8 @@ export function ChatBot({ view, onNavigate }: {
             className={mood === "happy" ? "tally-boing" : "tally-bob"}
             data-paused={mood === "drag"}
           >
-            <TallyFace size={64} mood={mood} gaze={gaze} />
+            <TallyFace size={64} mood={mood} gaze={lookAtDesk ?? gaze} live={!!status?.llm} />
           </span>
-          {!open && (
-            <span
-              aria-hidden
-              className={`absolute bottom-1 right-1 size-3 rounded-full border-2 border-surface transition-colors duration-500 ${
-                status?.llm ? "bg-ok" : "bg-faint"
-              }`}
-            />
-          )}
         </button>
       </div>
 
@@ -512,8 +631,11 @@ export function ChatBot({ view, onNavigate }: {
           ref={panel}
           role="dialog"
           aria-label="tally — the companion"
-          style={{ top: py, left: px, width: PW, height: panelH }}
-          className="menu-in fixed z-40 flex flex-col overflow-hidden rounded-[14px] border border-line bg-surface shadow-[0_24px_64px_-20px_rgba(16,19,23,0.45)]"
+          style={{
+            top: py, left: px, width: PW, height: panelH,
+            transformOrigin: tailTop ? "top center" : "bottom center",
+          }}
+          className={`${closing ? "desk-out" : "desk-in"} fixed z-40 flex flex-col overflow-hidden rounded-[14px] border border-line bg-surface shadow-[0_24px_64px_-20px_rgba(16,19,23,0.45)]`}
         >
           {/* the tail — a small diamond that keeps the desk attached to the ball */}
           {(tailTop || tailBottom) && (
@@ -529,7 +651,7 @@ export function ChatBot({ view, onNavigate }: {
           {/* header — who, where, and the brain as a color that settles,
               not a box in the corner */}
           <div className="flex items-center gap-3 border-b border-line px-3.5 py-2.5">
-            <TallyFace size={30} mood={mood} gaze={gaze} className="mt-0.5" />
+            <TallyFace size={30} mood={mood} gaze={gaze} live={!!status?.llm} className="mt-0.5" />
             <div className="min-w-0 flex-1">
               <div className="text-[13px] font-semibold leading-tight">Tally</div>
               <div className="truncate text-[10.5px] text-faint">
@@ -575,10 +697,11 @@ export function ChatBot({ view, onNavigate }: {
                 </div>
               ) : (
                 <div key={i} className="flex gap-2.5">
-                  <TallyFace size={22} mood={busy && i === msgs.length - 1 ? "think" : "idle"} className="mt-0.5" />
+                  <TallyFace size={22} mood={(busy || streaming) && i === msgs.length - 1 ? "think" : "idle"} className="mt-0.5" />
                   <div className="min-w-0">
                     <div className="whitespace-pre-wrap text-[12.5px] leading-relaxed text-ink">
                       {m.text}
+                      {streaming && i === msgs.length - 1 && <span className="tally-caret" aria-hidden />}
                     </div>
                     {m.action && (
                       <button
@@ -589,7 +712,7 @@ export function ChatBot({ view, onNavigate }: {
                         {m.action.label} →
                       </button>
                     )}
-                    {m.mode && (
+                    {m.mode && !streaming && (
                       <div className="mt-1.5 font-mono text-[9.5px] tracking-wide text-faint">
                         {m.mode === "llm" && m.model ? `groq · ${m.model}` : SOURCE[m.mode]}
                       </div>
@@ -598,7 +721,7 @@ export function ChatBot({ view, onNavigate }: {
                 </div>
               ),
             )}
-            {busy && (
+            {busy && !streaming && (
               <div className="flex gap-2.5">
                 <TallyFace size={22} mood="think" className="mt-0.5" />
                 <Typing />
