@@ -346,57 +346,55 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
         </Reveal>
       </section>
 
-      {/* ------------------------------ cta band — the night desk, same in both themes ------------------------------ */}
+      {/* ------------------------------ cta band — the page opens on a grid card and closes on one ------------------------------ */}
       <Reveal>
-        <section className="grid-bg-dark relative overflow-hidden rounded-t-md border border-b-0 border-[#0d1017] bg-[#0d1017] px-7 py-11 text-white sm:px-10">
+        <section className="cta-band relative overflow-hidden rounded-md border border-line bg-surface px-7 py-11 sm:px-10">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div className="max-w-[52ch]">
-              <div className="kicker text-white/50">you are the desk</div>
-              <h2 className="mt-3 text-balance text-[27px] font-semibold leading-[1.12] tracking-[-0.022em]">
+              <div className="kicker text-accent">you are the desk</div>
+              <h2 className="mt-3 text-balance text-[27px] font-semibold leading-[1.12] tracking-[-0.022em] text-ink">
                 Twelve incidents are waiting. Two closed themselves. One pages you.
               </h2>
-              <p className="mt-3 text-[14px] leading-relaxed text-white/70">
+              <p className="mt-3 text-[14px] leading-relaxed text-muted">
                 Approve a proposed adjustment, reject one, or let the SEV-1 sit — every
                 decision lands on the incident's timeline as a human event. The audit trail
                 is born in front of you.
               </p>
-              <p className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-white/40">
-                <span className="rounded-[3px] border border-white/20 px-1.5 py-0.5 font-mono text-[10.5px] text-white/60">⌘K</span>
+              <p className="mt-4 flex flex-wrap items-center gap-2 text-[12px] text-faint">
+                <span className="rounded-[3px] border border-line bg-paper px-1.5 py-0.5 font-mono text-[10.5px] text-muted">⌘K</span>
                 <span>anywhere — tally, the desk's companion, answers with the live batch (regex when no key, groq when there is one)</span>
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3 lg:justify-end">
               <button
                 onClick={onOpen}
-                className="rounded-[5px] bg-white px-6 py-3 text-[14px] font-semibold text-[#0d1017] shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.4)]"
+                className="rounded-[5px] bg-ink px-6 py-3 text-[14px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
               >
                 Open the board →
               </button>
               <button
                 onClick={onPm}
-                className="rounded-[5px] border border-white/25 px-5 py-3 text-[14px] font-medium text-white transition-all hover:-translate-y-0.5 hover:bg-white/10"
+                className="rounded-[5px] border border-line2 bg-surface px-5 py-3 text-[14px] font-medium text-ink transition-all hover:-translate-y-0.5 hover:bg-paper"
               >
                 Read the postmortem
               </button>
             </div>
           </div>
           {m && (
-            <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-white/10 pt-6 sm:grid-cols-4">
+            <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-6 sm:grid-cols-4">
               {([
-                ["match rate", <CountUp key="mr" value={m.match_rate} decimals={1} suffix="%" className="font-mono text-[24px] font-semibold leading-none text-white" />],
-                ["incidents", <CountUp key="inc" value={m.incidents_total} className="font-mono text-[24px] font-semibold leading-none text-white" />],
-                ["auto-resolved", <CountUp key="ar" value={m.auto_resolved} className="font-mono text-[24px] font-semibold leading-none text-white" />],
-                ["waiting on you", <CountUp key="ah" value={m.awaiting_human} className="font-mono text-[24px] font-semibold leading-none text-white" />],
+                ["match rate", <CountUp key="mr" value={m.match_rate} decimals={1} suffix="%" className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                ["incidents", <CountUp key="inc" value={m.incidents_total} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                ["auto-resolved", <CountUp key="ar" value={m.auto_resolved} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                ["waiting on you", <CountUp key="ah" value={m.awaiting_human} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
               ] as [string, ReactNode][]).map(([l, v]) => (
                 <div key={l}>
                   <div>{v}</div>
-                  <div className="kicker mt-2.5 text-white/45">{l}</div>
+                  <div className="kicker mt-2.5 text-faint">{l}</div>
                 </div>
               ))}
             </div>
           )}
-          {/* the band dissolves into the footer's ink — one piece, not two */}
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-transparent to-[#0d1017]" />
         </section>
       </Reveal>
     </div>

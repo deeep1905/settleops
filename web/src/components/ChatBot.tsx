@@ -218,6 +218,8 @@ export function ChatBot({ view, onNavigate }: {
   const [hint, setHint] = useState(true);
 
   const orb = useRef<HTMLButtonElement>(null);
+  const orbWrap = useRef<HTMLDivElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLInputElement>(null);
   const drag = useRef<{ sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
@@ -282,6 +284,20 @@ export function ChatBot({ view, onNavigate }: {
       .then(setStatus)
       .catch(() => setStatus(null));
   }, []);
+
+  /* a desk closes when you walk away — a pointerdown anywhere that isn't
+     tally or her panel folds it up */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: globalThis.PointerEvent) => {
+      const t = e.target as Node | null;
+      if (!t) return;
+      if (orbWrap.current?.contains(t) || panel.current?.contains(t)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
 
   /* ⌘K / ctrl-K toggles, esc closes */
   useEffect(() => {
@@ -446,7 +462,7 @@ export function ChatBot({ view, onNavigate }: {
   return (
     <>
       {/* ---------------- the companion, wherever you put her ---------------- */}
-      <div className="fixed z-50" style={{ top: pos.y, left: pos.x }}>
+      <div ref={orbWrap} className="fixed z-50" style={{ top: pos.y, left: pos.x }}>
         {hint && !open && mood !== "drag" && (
           <div
             aria-hidden
@@ -482,7 +498,7 @@ export function ChatBot({ view, onNavigate }: {
           {!open && (
             <span
               aria-hidden
-              className={`absolute bottom-1 right-1 size-3 rounded-full border-2 border-surface ${
+              className={`absolute bottom-1 right-1 size-3 rounded-full border-2 border-surface transition-colors duration-500 ${
                 status?.llm ? "bg-ok" : "bg-faint"
               }`}
             />
@@ -493,6 +509,7 @@ export function ChatBot({ view, onNavigate }: {
       {/* ---------------- the desk it opens, tail pointing home ---------------- */}
       {open && (
         <div
+          ref={panel}
           role="dialog"
           aria-label="tally — the companion"
           style={{ top: py, left: px, width: PW, height: panelH }}
@@ -509,7 +526,8 @@ export function ChatBot({ view, onNavigate }: {
             />
           )}
 
-          {/* header — who, where, which brain, and the broom */}
+          {/* header — who, where, and the brain as a color that settles,
+              not a box in the corner */}
           <div className="flex items-center gap-3 border-b border-line px-3.5 py-2.5">
             <TallyFace size={30} mood={mood} gaze={gaze} className="mt-0.5" />
             <div className="min-w-0 flex-1">
@@ -518,13 +536,19 @@ export function ChatBot({ view, onNavigate }: {
                 reading · {PAGE_LABEL[view]}
               </div>
             </div>
-            <span
-              className="chip shrink-0 border border-line bg-paper text-[10px] text-faint"
+            <div
+              className="flex shrink-0 items-center gap-1.5"
               title={status?.llm ? `${status.provider} · ${status.model}` : "no key — the deterministic brain answers"}
             >
-              <span className={`size-1.5 rounded-full ${status?.llm ? "bg-ok" : "bg-faint"}`} aria-hidden />
-              {status?.llm ? "groq · live" : "offline smarts"}
-            </span>
+              <span
+                aria-hidden
+                className="tally-live"
+                data-on={status?.llm ? "true" : "false"}
+              />
+              <span className="text-[10.5px] text-faint">
+                {status?.llm ? "groq · live" : "offline smarts"}
+              </span>
+            </div>
             <button
               type="button"
               onClick={reset}
@@ -606,14 +630,14 @@ export function ChatBot({ view, onNavigate }: {
               onKeyDown={onInputKey}
               placeholder="ask tally — /help for commands"
               aria-label="ask tally"
-              className="min-w-0 flex-1 rounded-[10px] border border-line bg-paper px-3 py-2 text-[12.5px] text-ink placeholder:text-faint focus:border-accent focus:outline-none"
+              className="min-w-0 flex-1 rounded-full border border-line bg-paper px-4 py-2.5 text-[12.5px] text-ink placeholder:text-faint focus:border-accent focus:outline-none"
             />
             <button
               type="button"
               onClick={() => void send(input)}
               disabled={busy || !input.trim()}
               aria-label="send"
-              className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-ink text-paper transition-opacity hover:opacity-85 disabled:opacity-30"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-paper transition-opacity hover:opacity-85 disabled:opacity-30"
             >
               <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden>
                 <path d="M2.5 8h10M9 4.5L12.5 8 9 11.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />

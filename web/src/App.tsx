@@ -55,9 +55,8 @@ export default function App() {
     } finally { setRestarting(false); }
   };
 
-  /* on the overview the page ends in the night band — the footer joins
-     that piece instead of starting a new one */
-  const night = view === "home";
+  /* the landing ends on its own card now — every view closes the same
+     way, into the same standard footer */
 
   return (
     <div className="min-h-screen">
@@ -105,7 +104,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`mx-auto max-w-6xl px-4 pt-8 sm:px-6 ${night ? "pb-0" : "pb-20"}`}>
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-20 sm:px-6">
         {/* views compose themselves on navigation; incidents re-compose per id */}
         <div key={view === "incident" && current ? `incident-${current.id}` : view} className="view-in">
           {error && (
@@ -151,13 +150,9 @@ export default function App() {
 
       {/* the bottom of the desk: mark + copyright + lamp + source on the
           left, quiet link columns on the right. A footer says where things
-          are; it does not repeat the site. On the overview it sits on the
-          night canvas — same ink, a hairline seam, no separate piece. */}
-      <footer
-        className={night
-          ? "border-t border-white/[0.08] bg-[#0d1017] text-white"
-          : "border-t border-line bg-surface"}
-      >
+          are; it does not repeat the site. Standard tokens — it follows the
+          theme the way every other surface does. */}
+      <footer className="border-t border-line bg-surface">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-10 sm:px-6">
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
             {/* ---------------- the left column ---------------- */}
@@ -171,8 +166,8 @@ export default function App() {
                   <LogoMark size={20} className="opacity-80 transition-opacity group-hover:opacity-100" />
                   <span className="text-[15px] font-semibold leading-none tracking-[-0.01em]">SettleOps</span>
                 </button>
-                <p className={`mt-5 text-[11px] leading-relaxed ${night ? "text-white/40" : "text-faint"}`}>
-                  © 2026 SettleOps · built by <a href="https://github.com/deeep1905" target="_blank" rel="noreferrer" className={`font-medium transition-colors ${night ? "text-white/60 hover:text-white" : "text-muted hover:text-ink"}`}>deeep1905</a>
+                <p className="mt-5 text-[11px] leading-relaxed text-faint">
+                  © 2026 SettleOps · built by <a href="https://github.com/deeep1905" target="_blank" rel="noreferrer" className="font-medium text-muted transition-colors hover:text-ink">deeep1905</a>
                   <br />
                   Razorpay AI Buildathon 2026 · Track 4
                   <br />
@@ -181,16 +176,12 @@ export default function App() {
               </div>
 
               <div className="mt-auto flex items-center gap-3 pt-8">
-                <ThemeToggle night={night} />
+                <ThemeToggle />
                 <a
                   href={REPO}
                   target="_blank"
                   rel="noreferrer"
-                  className={`inline-flex items-center gap-2 rounded-[4px] border py-1.5 pl-2.5 pr-3 text-[11px] font-medium transition-colors ${
-                    night
-                      ? "border-white/20 text-white/70 hover:border-white/40 hover:text-white"
-                      : "border-line text-muted hover:border-line2 hover:text-ink"
-                  }`}
+                  className="inline-flex items-center gap-2 rounded-[4px] border border-line py-1.5 pl-2.5 pr-3 text-[11px] font-medium text-muted transition-colors hover:border-line2 hover:text-ink"
                 >
                   <svg aria-hidden className="size-3.5" viewBox="0 0 16 16" fill="currentColor">
                     <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
@@ -203,7 +194,7 @@ export default function App() {
             {/* ---------------- quiet link columns ---------------- */}
             <nav className="flex flex-1 flex-wrap gap-x-14 gap-y-8" aria-label="footer">
               <div className="flex flex-col">
-                <span className={`mb-1.5 text-[12.5px] font-semibold ${night ? "text-white" : "text-ink"}`}>Console</span>
+                <span className="mb-1.5 text-[12.5px] font-semibold text-ink">Console</span>
                 <div className="flex flex-col gap-1">
                   {([
                     ["home", "Overview"],
@@ -214,9 +205,7 @@ export default function App() {
                     <button
                       key={v}
                       onClick={() => { setView(v); window.scrollTo({ top: 0 }); }}
-                      className={`w-fit text-left text-[13px] leading-relaxed transition-colors ${
-                        night ? "text-white/55 hover:text-white" : "text-muted hover:text-ink"
-                      }`}
+                      className="w-fit text-left text-[13px] leading-relaxed text-muted transition-colors hover:text-ink"
                     >
                       {label}
                     </button>
@@ -225,7 +214,7 @@ export default function App() {
               </div>
 
               <div className="flex flex-col">
-                <span className={`mb-1.5 text-[12.5px] font-semibold ${night ? "text-white" : "text-ink"}`}>The repo</span>
+                <span className="mb-1.5 text-[12.5px] font-semibold text-ink">The repo</span>
                 <div className="flex flex-col gap-1">
                   {([
                     ["README", `${REPO}/blob/main/README.md`],
@@ -238,18 +227,16 @@ export default function App() {
                       href={href}
                       target="_blank"
                       rel="noreferrer"
-                      className={`w-fit text-[13px] leading-relaxed transition-colors ${
-                        night ? "text-white/55 hover:text-white" : "text-muted hover:text-ink"
-                      }`}
+                      className="w-fit text-[13px] leading-relaxed text-muted transition-colors hover:text-ink"
                     >
-                      {label} <span aria-hidden className={night ? "text-white/30" : "text-faint"}>↗</span>
+                      {label} <span aria-hidden className="text-faint">↗</span>
                     </a>
                   ))}
                 </div>
               </div>
 
               <div className="flex flex-col">
-                <span className={`mb-1.5 text-[12.5px] font-semibold ${night ? "text-white" : "text-ink"}`}>Verify</span>
+                <span className="mb-1.5 text-[12.5px] font-semibold text-ink">Verify</span>
                 <div className="flex flex-col gap-1">
                   {([
                     ["make test", `${REPO}#quickstart`],
@@ -261,9 +248,7 @@ export default function App() {
                       href={href}
                       target="_blank"
                       rel="noreferrer"
-                      className={`w-fit font-mono text-[11.5px] leading-relaxed transition-colors ${
-                        night ? "text-white/55 hover:text-white" : "text-muted hover:text-ink"
-                      }`}
+                      className="w-fit font-mono text-[11.5px] leading-relaxed text-muted transition-colors hover:text-ink"
                     >
                       {label}
                     </a>
