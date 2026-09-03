@@ -28,6 +28,10 @@
 html {
   -webkit-font-smoothing: antialiased;
   scroll-behavior: smooth;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
@@ -223,7 +227,63 @@ html[data-theme="dark"] .cta-band {
 :where(button, a):focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
-  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* the premium layer — the details a user feels before they can name   */
+/* them. Selection inked with the brand, hairline scrollbars that      */
+/* match the console, native widgets that follow the theme, and       */
+/* hover shadows that exist on the night desk too. (Linear calls       */
+/* this restraint; Stripe calls it number-first; it all reads as       */
+/* "designed" only when these are right.)                             */
+/* ------------------------------------------------------------------ */
+
+::selection {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+html[data-theme="dark"] ::selection {
+  background: var(--color-accent);
+  color: #0e1116;
+}
+
+/* hairline scrollbars — the console's own lines, not the OS's chunk */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line2) transparent;
+}
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line2);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-faint);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* input placeholders whisper; they never compete with typed ink */
+::placeholder {
+  color: var(--color-faint);
+  opacity: 1;
+}
+
+/* the night desk leans on depth, not lightness — the day theme's
+   soft-black shadows vanish on #0e1116, so the dark theme gets its
+   own: real black, thrown from the same two heights */
+html[data-theme="dark"] .lift:hover {
+  border-color: var(--color-line2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  transform: translateY(-1.5px) scale(1.007);
 }
 
 /* ------------------------------------------------------------------ */
