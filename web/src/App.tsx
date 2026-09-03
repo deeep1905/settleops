@@ -166,7 +166,7 @@ export default function App() {
                   <LogoMark size={20} className="opacity-80 transition-opacity group-hover:opacity-100" />
                   <span className="text-[15px] font-semibold leading-none tracking-[-0.01em]">SettleOps</span>
                 </button>
-                <p className="mt-5 text-[11px] leading-relaxed text-faint">
+                <p className="mt-5 text-[11px] leading-relaxed text-muted">
                   © 2026 SettleOps · built by <a href="https://github.com/deeep1905" target="_blank" rel="noreferrer" className="font-medium text-muted transition-colors hover:text-ink">deeep1905</a>
                   <br />
                   Razorpay AI Buildathon 2026 · Track 4

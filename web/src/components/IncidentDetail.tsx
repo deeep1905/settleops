@@ -78,16 +78,18 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
             {classLabel[i.break_class] ?? i.break_class}
           </span>
           <span key={i.status} className={`chip pop ${statusTone(i.status)}`}>{i.status}</span>
-          <span className="tabular ml-auto font-mono text-[17px] font-semibold">
+          <span className="tabular ml-auto font-mono text-[19px] font-semibold">
             {inr(i.amount_paise)}
           </span>
         </div>
-        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 font-mono text-[11.5px] text-muted">
-          <span>order {i.order_ref}</span>
-          <span>books {i.books_id ?? "—"}</span>
-          <span>settle {i.settle_id ?? "—"}</span>
-          <span>currency {i.currency}</span>
-          <span>runbook {i.runbook}</span>
+        {/* machine strings, but readable: the label whispers, the value
+            speaks — separation without a whole new layout */}
+        <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[11.5px]">
+          <span><span className="text-faint">order</span> <span className="text-muted">{i.order_ref}</span></span>
+          <span><span className="text-faint">books</span> <span className="text-muted">{i.books_id ?? "—"}</span></span>
+          <span><span className="text-faint">settle</span> <span className="text-muted">{i.settle_id ?? "—"}</span></span>
+          <span><span className="text-faint">currency</span> <span className="text-muted">{i.currency}</span></span>
+          <span><span className="text-faint">runbook</span> <span className="text-muted">{i.runbook}</span></span>
         </div>
       </div>
 
@@ -209,7 +211,7 @@ export function IncidentDetail({ incident: i, onBack, onDecide }: {
       </div>
 
       {/* money-at-stake footnote */}
-      <p className="mt-4 text-[11.5px] text-faint">
+      <p className="mt-4 text-[11.5px] text-muted">
         money at stake {rupees2(i.amount_paise)} · every event above is in the append-only log
         (<span className="font-mono">data/incident_log.jsonl</span>) and replayable end to end
       </p>

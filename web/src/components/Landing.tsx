@@ -97,7 +97,9 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
           <div className="rise inline-flex max-w-full items-center rounded-[4px] border border-line bg-surface px-3.5 py-1.5">
             <span className="kicker truncate text-muted">
               razorpay ai buildathon 2026 · track 4
-              <span className="hidden md:inline"> · ai finance controller</span>
+              {/* the tail fits the single-column hero (below lg); in the
+                  two-column grid the left column is too narrow for it */}
+              <span className="hidden md:inline lg:hidden"> · ai finance controller</span>
             </span>
           </div>
           <h1 style={{ animationDelay: "70ms" }} className="rise mt-5 max-w-[17ch] text-balance text-[clamp(34px,5.2vw,52px)] font-semibold leading-[1.05] tracking-[-0.027em]">

@@ -229,7 +229,7 @@ html[data-theme="dark"] .cta-band {
 /* ------------------------------------------------------------------ */
 /* tally — the companion: a round face with a life of its own. The     */
 /* ball bobs, the pupils track the pointer, the blink is on a slow     */
-/* clock, the antenna leans along, and good answers boing.             */
+/* clock, and good answers boing.                                       */
 /* ------------------------------------------------------------------ */
 @keyframes tally-blink {
   0%, 93%, 100% { transform: scaleY(1); }
@@ -261,39 +261,6 @@ html[data-theme="dark"] .cta-band {
   100% { transform: scale(1); }
 }
 .tally-boing { animation: tally-boing 0.55s cubic-bezier(0.3, 1.4, 0.4, 1); }
-
-/* the antenna leans as the ball moves; while she thinks, it hurries */
-@keyframes tally-wobble {
-  0%, 100% { transform: rotate(-6deg); }
-  50% { transform: rotate(6deg); }
-}
-.tally-antenna {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: tally-wobble 3.6s ease-in-out infinite;
-}
-.tally-antenna[data-think="true"] { animation-duration: 0.7s; }
-
-/* thinking — the break marker pulses, like a break on the board */
-@keyframes tally-signal {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.45; }
-}
-
-/* the antenna's diamond — the break marker from the logo, and the
-   companion's status light. amber while the deterministic brain
-   answers, settled green when the live one is on: a 0.6s cross-fade,
-   never a swap, and no box anywhere on the ball. while she thinks,
-   it pulses like a break on the board */
-.tally-signal {
-  fill: #FFB224;
-  transition: fill 0.6s ease, filter 0.6s ease;
-}
-.tally-signal[data-think="true"] { animation: tally-signal 1.5s ease-in-out infinite; }
-.tally-signal[data-live="true"] {
-  fill: var(--color-ok);
-  filter: drop-shadow(0 0 2.5px rgba(5, 150, 105, 0.75));
-}
 
 /* moods cross-fade — every face shape is always drawn, only opacity
    moves, so expressions settle into each other instead of snapping */
@@ -378,8 +345,6 @@ html[data-theme="dark"] .tally-orb[data-drag="true"] { filter: drop-shadow(0 20p
   .tally-pupil,
   .tally-bob,
   .tally-boing,
-  .tally-antenna,
-  .tally-signal,
   .tally-live,
   .tally-dot,
   .tally-fade,

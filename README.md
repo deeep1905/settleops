@@ -107,10 +107,11 @@ remembers where you left her; her chat opens beside wherever she sits
 and folds away when you walk off. Her face is alive and every
 expression cross-fades rather than snaps: pupils that follow the
 pointer, a blink on a slow clock, wide eyes while being carried, a
-boing when an answer lands, and the amber break marker pulsing on her
-antenna while she thinks. The same diamond is her status light — amber
-when the deterministic brain answers, settled green when the live one
-is on (a 0.6s cross-fade, never a badge). She knows which view you are
+boing when an answer lands. Nothing else rides on the ball — no
+badge, no antenna, no clipped corners: just a clean round companion
+whose status shows as a color that settles in the desk's header
+(quiet grey for the deterministic brain, breathing green when the
+live one is on). She knows which view you are
 reading and answers in its context.
 
 Two brains, same contract (`settleops/assistant.py`, rules T1-T5):

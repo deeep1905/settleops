@@ -109,10 +109,10 @@ export function Board({ batch, brain, onOpen }: {
                 <th className="px-4 py-2.5 font-semibold">sev</th>
                 <th className="px-3 py-2.5 font-semibold">incident</th>
                 <th className="px-3 py-2.5 font-semibold">class</th>
-                <th className="px-3 py-2.5 font-semibold">amount</th>
+                <th className="px-3 py-2.5 text-right font-semibold">amount</th>
                 <th className="px-3 py-2.5 font-semibold">runbook</th>
                 <th className="px-3 py-2.5 font-semibold">status</th>
-                <th className="px-3 py-2.5 font-semibold">why</th>
+                <th className="px-4 py-2.5 font-semibold">why</th>
               </tr>
             </thead>
             {/* keyed by the active filters so a new filter replays the stagger */}
@@ -124,23 +124,23 @@ export function Board({ batch, brain, onOpen }: {
                   style={{ animationDelay: `${Math.min(idx, 12) * 30}ms` }}
                   className="row-in cursor-pointer border-b border-line/70 transition-colors last:border-b-0 hover:bg-accent-soft/50"
                 >
-                  <td className="px-4 py-2.5">
+                  <td className="px-4 py-2">
                     <span className={`chip ${sevTone(i.severity)}`}>{i.severity}</span>
                   </td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] font-medium text-accent">
+                  <td className="px-3 py-2 font-mono text-[12px] font-medium text-accent">
                     {i.id}
                   </td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2">
                     <span className={`chip ${classTone[i.break_class] ?? ""}`}>
                       {classLabel[i.break_class] ?? i.break_class}
                     </span>
                   </td>
-                  <td className="px-3 py-2.5 font-mono text-[12.5px] tabular">{inr(i.amount_paise)}</td>
-                  <td className="px-3 py-2.5 font-mono text-[12px] text-muted">{i.runbook}</td>
-                  <td className="px-3 py-2.5">
+                  <td className="px-3 py-2 font-mono text-[12.5px] tabular text-right">{inr(i.amount_paise)}</td>
+                  <td className="px-3 py-2 font-mono text-[12px] text-muted">{i.runbook}</td>
+                  <td className="px-3 py-2">
                     <span className={`chip ${statusTone(i.status)}`}>{i.status}</span>
                   </td>
-                  <td className="max-w-[280px] truncate px-3 py-2.5 text-[12.5px] text-muted">
+                  <td title={i.resolve_reason} className="max-w-[280px] truncate px-4 py-2 text-[12.5px] text-muted">
                     {i.resolve_reason}
                   </td>
                 </tr>

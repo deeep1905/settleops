@@ -12,9 +12,8 @@ import { postJSON, getJSON } from "../lib";
  *     tail always pointing home
  *   · the face is alive and every change is a cross-fade, never a swap:
  *     pupils that glide after the pointer, a blink on a slow clock,
- *     moods for the moments that matter. no clipped corners, no badge —
- *     the antenna's diamond is the status light, amber when the local
- *     brain answers and settling to green when the live one is on
+ *     moods for the moments that matter. no clipped corners, no badge,
+ *     no antenna — just a clean, round little companion
  *   · answers arrive the way thoughts do — token by token. the engine
  *     streams SSE frames; the deterministic brains type themselves out
  *     in small word groups, the live brain streams its real tokens, and
@@ -102,8 +101,8 @@ function savePos(p: Pos) {
 
 /* ------------------------------------------------------------------ face */
 
-function TallyFace({ size = 64, mood = "idle", gaze, live, className = "" }: {
-  size?: number; mood?: Mood; gaze?: { x: number; y: number }; live?: boolean; className?: string;
+function TallyFace({ size = 64, mood = "idle", gaze, className = "" }: {
+  size?: number; mood?: Mood; gaze?: { x: number; y: number }; className?: string;
 }) {
   const happy = mood === "happy";
   const think = mood === "think";
@@ -125,16 +124,10 @@ function TallyFace({ size = 64, mood = "idle", gaze, live, className = "" }: {
 
   return (
     <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden className={`shrink-0 ${className}`}>
-      {/* antenna — the amber diamond is the break marker from the logo;
-          it leans with the ball, pulses while she thinks, and is the
-          status light: green when the live brain is on, amber when the
-          deterministic one answers — a settle, never a swap */}
-      <g className="tally-antenna" data-think={think}>
-        <line x1="32" y1="24" x2="32" y2="13.5" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
-        <path className="tally-signal" data-think={think} data-live={live ? "true" : undefined}
-              d="M32 5.5l4.4 5.2L32 16l-4.4-5.3Z" />
-      </g>
-
+      {/* just a round little companion — the head is the whole body, no
+          antenna, no extras: clean and cute, and it sits centered in the
+          box so every size (orb, header, message row) crops it the same */}
+      <g transform="translate(0,-6)">
       {/* the head — properly round, the one shape a companion should be */}
       <circle cx="32" cy="38" r="22" fill="var(--color-surface)" stroke="var(--color-ink)" strokeWidth="2" />
       {/* a quiet highlight so the ball reads as a ball */}
@@ -187,6 +180,7 @@ function TallyFace({ size = 64, mood = "idle", gaze, live, className = "" }: {
             d="M28.5 46.5h7" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
       <path className="tally-fade" style={{ opacity: on(!happy && !wide && !sad && !think) }}
             d="M26 44q6 5.2 12 0" fill="none" stroke="var(--color-ink)" strokeWidth="2" strokeLinecap="round" />
+      </g>
     </svg>
   );
 }
@@ -593,8 +587,13 @@ export function ChatBot({ view, onNavigate }: {
         {hint && !open && mood !== "drag" && (
           <div
             aria-hidden
-            className={`pop pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-line bg-surface px-2.5 py-1 text-[10.5px] font-medium text-muted shadow-[0_4px_12px_-4px_rgba(16,19,23,0.25)] ${
+            /* the label keeps all of itself on the glass — centered when
+               there's room, pinned to the near edge when she's tucked
+               into a corner */
+            className={`pop pointer-events-none absolute whitespace-nowrap rounded-full border border-line bg-surface px-2.5 py-1 text-[10.5px] font-medium text-muted shadow-[0_4px_12px_-4px_rgba(16,19,23,0.25)] ${
               pos.y < 64 ? "-bottom-8" : "-top-8"
+            } ${
+              pos.x > vp.w - 200 ? "right-0" : pos.x < 130 ? "left-0" : "left-1/2 -translate-x-1/2"
             }`}
           >
             drag me anywhere · tap to chat
@@ -620,7 +619,7 @@ export function ChatBot({ view, onNavigate }: {
             className={mood === "happy" ? "tally-boing" : "tally-bob"}
             data-paused={mood === "drag"}
           >
-            <TallyFace size={64} mood={mood} gaze={lookAtDesk ?? gaze} live={!!status?.llm} />
+            <TallyFace size={64} mood={mood} gaze={lookAtDesk ?? gaze} />
           </span>
         </button>
       </div>
@@ -651,7 +650,7 @@ export function ChatBot({ view, onNavigate }: {
           {/* header — who, where, and the brain as a color that settles,
               not a box in the corner */}
           <div className="flex items-center gap-3 border-b border-line px-3.5 py-2.5">
-            <TallyFace size={30} mood={mood} gaze={gaze} live={!!status?.llm} className="mt-0.5" />
+            <TallyFace size={30} mood={mood} gaze={gaze} className="mt-0.5" />
             <div className="min-w-0 flex-1">
               <div className="text-[13px] font-semibold leading-tight">Tally</div>
               <div className="truncate text-[10.5px] text-faint">
