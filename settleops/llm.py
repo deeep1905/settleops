@@ -59,9 +59,9 @@ def llm_hint(b: Break, evidence: str) -> tuple[str, str]:
 def _groq(prompt: str) -> str:
     import urllib.request, json as _json
     body = _json.dumps({
-        "model": "llama-3.1-8b-instant",
+        "model": "openai/gpt-oss-20b",
         "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 80, "temperature": 0.2,
+        "max_tokens": 128, "temperature": 0.2, "reasoning_effort": "low",
     }).encode()
     req = urllib.request.Request(
         "https://api.groq.com/openai/v1/chat/completions", data=body,
