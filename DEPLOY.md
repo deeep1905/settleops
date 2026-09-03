@@ -31,9 +31,12 @@ the Python function wakes per request (~1–2 s cold start, with an honest
 3. Framework preset: **Other** (zero-config picks it up). The build is
    driven by `vercel.json`:
    - `buildCommand`: `cd web && npm install && npm run build`
-   - `outputDirectory`: `web/dist`
-   - `api/index.py` is deployed as the serverless function (rewrites
-     send `/api/*` to it)
+   - `api/index.py` is the entrypoint: it exposes the FastAPI `app`
+     and mounts `web/dist` with `StaticFiles`, which Vercel promotes
+     to the CDN at build time — the API routes register first, so
+     `/api/*` always answers from the engine and everything else
+     serves the console. No rewrites: the app must see the original
+     URL (a rewrite to `/api` is what once made every route 404).
 4. Environment variables (all optional):
 
    | Variable | Value | Effect |
