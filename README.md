@@ -154,21 +154,27 @@ settleops/            the engine package
   postmortem.py       the SRE artifact
   api.py              FastAPI service (+ /api/chat, /api/chat/stream)
 api/index.py          Vercel serverless entry
+Dockerfile            one image, any host (Render/Koyeb/Fly/HF/Cloud Run)
+render.yaml           Render one-click blueprint
 web/                  the console (React + Vite + Tailwind)
-tests/                97 tests incl. planted-truth matcher proofs
+tests/                100 tests incl. planted-truth matcher proofs
 results/              batch_report.json + postmortem.md (regeneration-only)
 data/                 incident_log.jsonl (regeneration-only)
 docs/                 logo.svg, PITCH.md, FORM_ANSWERS.md
-DEPLOY.md             local + Vercel (and why not Render/Railway)
+DEPLOY.md             local + every host compared, cheapest-first
 ```
 
 ## Deploy
 
-See **DEPLOY.md**. One command, free tier, and the URL does not sleep:
-static assets are always-on, the Python function wakes per request
-(~1-2s cold start, with an honest loading state in the console). Render
-and Railway free tiers spin down after 15 idle minutes and take ~50s to
-wake — a judge clicking your link sees a dead page. That is why Vercel.
+See **DEPLOY.md** — every host compared, cheapest first, with the
+one-line verdict up front: **Vercel for the link you paste in the
+submission** (free, the console is static on a CDN so the page never
+sleeps, the API wakes in ~1-2s into an honest loading state), **Render
+as the one-click backup** (this repo carries `render.yaml` + a
+`Dockerfile`; free tier, sleeps after 15 idle minutes), and
+**Oracle Always Free / Hetzner (~₹350/mo)** when this becomes a
+product that needs always-on. The same Dockerfile runs on Koyeb, HF
+Spaces, Fly and Cloud Run too.
 
 ## Limits (honest)
 

@@ -1,0 +1,16 @@
+# Render blueprint — deploy with the "Deploy to Render" button in DEPLOY.md,
+# or Dashboard → New → Blueprint → pick this repo. Render reads this file.
+#
+# Free plan: 750 instance-hours/month (enough for the whole month 24/7);
+# the service sleeps after ~15 idle minutes and wakes in ~30-60s. The
+# console's boot state shows the batch's known numbers while it wakes.
+services:
+  - type: web
+    name: settleops
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    envVars:
+      # optional — set in the dashboard after the first deploy
+      - key: GROQ_API_KEY
+        sync: false
