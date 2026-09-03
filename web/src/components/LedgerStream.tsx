@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import type { Batch, Incident } from "../types";
 import { classLabel, sevTone } from "../lib";
 
+/* the demo batch is deterministic (R42 · seed 42) — while the engine
+   warms up, the HUD shows these pulsing instead of dashes, and the
+   scene flows warm-up traffic so the card is never blank */
+const BOOT = { match: 81.8, matched: 54, books: 66 };
+
 /**
  * LedgerStream.tsx — the hero's right side: the batch, in motion.
  *
@@ -136,7 +141,13 @@ export function StreamCard({ batch, brain, busy, onRun }: {
 
     const spawn = () => {
       const b = batchRef.current;
-      if (!b || busyRef.current) return;
+      if (busyRef.current) return;
+      if (!b) {
+        /* warm-up traffic: unlabeled pairs flow and merge while the
+           engine boots — the hero is never an empty card */
+        pairs.push({ t: 0, seed: Math.random() * 6.283, inc: null });
+        return;
+      }
       if (b !== lastBatch) { lastBatch = b; cursor = 0; forceBreak = true; }
       const ratio = b.counts.incidents / Math.max(1, b.counts.matched + b.counts.incidents);
       const isBreak = forceBreak || Math.random() < ratio;
@@ -490,12 +501,12 @@ export function StreamCard({ batch, brain, busy, onRun }: {
         <span className="truncate text-[12.5px] font-semibold tracking-[-0.01em] text-ink">
           The batch, in motion
         </span>
-        <span className="shrink-0 font-mono text-[11px] text-faint">
-          {batch ? `${batch.batch_id} · seed ${batch.seed}` : "booting"}
+        <span className={`shrink-0 font-mono text-[11px] text-faint ${batch ? "" : "animate-pulse opacity-60"}`}>
+          {batch ? `${batch.batch_id} · seed ${batch.seed}` : "R42 · seed 42"}
         </span>
       </div>
 
-      <div ref={wrapRef} className="relative h-[340px] touch-none sm:h-[400px] lg:h-[420px]">
+      <div ref={wrapRef} className="relative h-[300px] touch-none sm:h-[340px] lg:h-[400px]">
         <canvas
           ref={canvasRef}
           className="absolute inset-0"
@@ -507,13 +518,13 @@ export function StreamCard({ batch, brain, busy, onRun }: {
             the lanes label themselves in-scene, the counts live in the footer */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-surface/90 via-surface/55 to-transparent" />
 
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-[5px] border border-line/70 bg-surface/75 px-3 py-2 backdrop-blur-[2px]">
+        <div className={`pointer-events-none absolute bottom-3 left-3 rounded-[5px] border border-line/70 bg-surface/75 px-3 py-2 backdrop-blur-[2px] ${batch ? "" : "animate-pulse opacity-60"}`}>
           <div className="kicker text-faint">match rate</div>
           <div className="tabular mt-0.5 font-mono text-[20px] font-semibold leading-none text-ink">
-            {batch ? `${batch.match_rate}%` : "—"}
+            {batch ? `${batch.match_rate}%` : `${BOOT.match}%`}
           </div>
           <div className="tabular mt-1.5 text-[10px] text-faint">
-            {batch ? `${batch.counts.matched} of ${batch.counts.books} rows` : "—"}
+            {batch ? `${batch.counts.matched} of ${batch.counts.books} rows` : `${BOOT.matched} of ${BOOT.books} rows`}
           </div>
         </div>
 
@@ -541,15 +552,15 @@ export function StreamCard({ batch, brain, busy, onRun }: {
           </div>
         )}
         {!batch && !busy && (
-          <div className="absolute inset-0 grid place-items-center">
-            <span className="font-mono text-[12px] text-faint">starting the engine…</span>
+          <div className="absolute left-3 top-3 rounded-[4px] border border-line bg-surface/85 px-2.5 py-1 font-mono text-[10.5px] text-faint backdrop-blur-[2px]">
+            engine warming up…
           </div>
         )}
       </div>
 
       <div className="flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
-        <span className="truncate text-[11.5px] text-faint">
-          {batch ? `books ${batch.counts.books} · rail ${batch.counts.settlements} · ` : ""}
+        <span className={`truncate text-[11.5px] text-faint ${batch ? "" : "animate-pulse opacity-60"}`}>
+          {batch ? `books ${batch.counts.books} · rail ${batch.counts.settlements} · ` : "books 66 · rail 66 · "}
           {brain} brain · replayed from the ledger
         </span>
         <button

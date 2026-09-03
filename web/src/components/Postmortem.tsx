@@ -19,7 +19,61 @@ export function Postmortem({ onBoard }: { onBoard: () => void }) {
   }, []);
 
   if (error) return <div className="card px-4 py-8 text-center text-[13px] text-crit">{error}</div>;
-  if (!data) return <div className="card px-4 py-10 text-center text-[13px] text-muted">loading postmortem…</div>;
+
+  /* the deterministic batch warms fast — until it answers, the page
+     holds its full shape: real headings, pulsing numbers, skeleton
+     bars. No blank cards, no layout jump when the data lands. */
+  if (!data) return (
+    <div>
+      <section className="card grid-bg mb-6 overflow-hidden">
+        <div className="flex flex-wrap items-end justify-between gap-4 px-5 py-5 sm:px-6">
+          <div>
+            <div className="kicker text-accent">the sre artifact</div>
+            <h1 className="mt-2 text-[26px] font-semibold leading-[1.15] tracking-[-0.02em] sm:text-[30px]">
+              Postmortem
+            </h1>
+            <p className="mt-2 max-w-[60ch] text-[13.5px] leading-relaxed text-muted">
+              What happened, what the engine did, what it could not fix and why. The honest
+              list is the point: an incident console that hides its unresolved pile is
+              lying to you.
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="tabular animate-pulse text-[42px] font-semibold leading-none tracking-[-0.02em] text-ink opacity-50">81.8%</div>
+            <div className="kicker mt-1.5 text-faint">match rate</div>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:items-start">
+        <div className="card divide-y divide-line">
+          {[72, 94, 55, 83, 41].map((w, i) => (
+            <div key={i} className="px-5 py-4">
+              <div className="h-3 animate-pulse rounded bg-paper" style={{ width: `${w}%` }} />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="card px-4 py-3">
+                <div className="h-2 w-16 animate-pulse rounded bg-paper" />
+                <div className="mt-2.5 h-5 w-10 animate-pulse rounded bg-paper" />
+              </div>
+            ))}
+          </div>
+          <div className="card px-4 py-4">
+            <div className="h-2 w-20 animate-pulse rounded bg-paper" />
+            <div className="mt-4 space-y-2.5">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-1.5 w-full animate-pulse rounded-full bg-paper" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const m = data.metrics;
   const total = Math.max(1, m.incidents_total);

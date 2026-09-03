@@ -80,7 +80,7 @@ export function Board({ batch, brain, onOpen }: {
         <Kpi label="awaiting human" value={m.awaiting_human} tone="warn" />
         <Kpi label="paged" value={m.paged} tone="crit" />
         <Kpi label="SEV-1" value={m.sev1} tone="crit" />
-        <Kpi label="MTTR (auto)" value={`${m.mttr_hours_auto ?? "—"}h`} tone="ok" />
+        <Kpi label="MTTR (auto)" value={`${m.mttr_hours_auto ?? "—"}h`} tone="ok" hint={m.mttr_hours_auto == null ? "no auto-resolves this batch" : "mean time to resolve"} />
       </div>
 
       {/* ---------- filters ---------- */}

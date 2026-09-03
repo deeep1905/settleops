@@ -15,6 +15,20 @@ import { CountUp, CopyChip, Reveal } from "./ui";
 const REPO = "https://github.com/deeep1905/settleops";
 const TESTS = `${REPO}/blob/main/tests/test_engine.py`;
 
+/* the demo batch is deterministic — its numbers are known before the
+   engine answers. While it warms up, cards show these (pulsing) instead
+   of sitting blank; live values swap in the moment they land. */
+const BOOT = {
+  batch: "R42 · seed 42",
+  rows: "66 ↔ 66",
+  match: 81.8,
+  matched: 54,
+  books: 66,
+  incidents: 12,
+  autoResolved: 2,
+  awaiting: 9,
+};
+
 const LOOP = [
   {
     n: "01",
@@ -92,7 +106,10 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
   return (
     <div>
       {/* ------------------------------ hero ------------------------------ */}
-      <section className="grid-bg card mb-8 grid gap-8 px-7 py-12 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] lg:gap-10">
+      {/* the hero earns one screen: tight py-8 rhythm, a headline that
+          fills its column (balance splits it into two lines) and a
+          proportional right column keep it inside the viewport */}
+      <section className="grid-bg card mb-8 grid gap-7 px-6 py-8 sm:gap-8 sm:px-9 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] lg:gap-10">
         <div>
           <div className="rise inline-flex max-w-full items-center rounded-[4px] border border-line bg-surface px-3.5 py-1.5">
             <span className="kicker truncate text-muted">
@@ -102,18 +119,18 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               <span className="hidden md:inline lg:hidden"> · ai finance controller</span>
             </span>
           </div>
-          <h1 style={{ animationDelay: "70ms" }} className="rise mt-5 max-w-[17ch] text-balance text-[clamp(34px,5.2vw,52px)] font-semibold leading-[1.05] tracking-[-0.027em]">
+          <h1 style={{ animationDelay: "70ms" }} className="rise mt-4 text-balance text-[clamp(29px,3.9vw,40px)] font-semibold leading-[1.08] tracking-[-0.026em]">
             Reconciliation is the SRE problem nobody gave an SRE.
           </h1>
-          <p style={{ animationDelay: "140ms" }} className="rise mt-5 max-w-[58ch] text-[15.5px] leading-relaxed text-muted">
+          <p style={{ animationDelay: "140ms" }} className="rise mt-4 max-w-[64ch] text-[14.5px] leading-[1.55] text-muted">
             Finance teams close books by hand: eyeball the settlement file against the
-            ledger, chase the differences in a spreadsheet, hope nothing slips. Ops teams
+            ledger, chase differences in a spreadsheet, hope nothing slips. Ops teams
             solved this shape years ago. <span className="font-medium text-ink">SettleOps</span>{" "}
             runs that loop on a payment batch — match two sources deterministically,
-            diagnose every break, run a bounded remediation runbook, page a human when
-            the machine shouldn't decide, and write the postmortem.
+            diagnose every break, run a bounded runbook, page a human when
+            the machine shouldn't decide, write the postmortem.
           </p>
-          <div style={{ animationDelay: "210ms" }} className="rise mt-7 flex flex-wrap items-center gap-3">
+          <div style={{ animationDelay: "210ms" }} className="rise mt-5 flex flex-wrap items-center gap-3">
             <button
               onClick={onOpen}
               className="rounded-[5px] bg-ink px-6 py-3 text-[14px] font-semibold text-paper shadow-[0_1px_2px_rgba(16,19,23,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_-8px_rgba(16,19,23,0.45)]"
@@ -127,8 +144,9 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               How it works
             </button>
           </div>
-          {/* live stat row — the engine's own numbers, not marketing's */}
-          <div style={{ animationDelay: "280ms" }} className="rise mt-7 flex flex-wrap items-center gap-y-4">
+          {/* live stat row — the engine's own numbers, not marketing's.
+              Boot values pulse until the live ones land — never a blank. */}
+          <div style={{ animationDelay: "280ms" }} className="rise mt-5 flex flex-wrap items-center gap-y-4">
             {c ? (
               [
                 ["rows in flight", <span key="r" className="tabular font-mono text-[18px] font-semibold leading-none text-ink">{c.books} ↔ {c.settlements}</span>],
@@ -141,10 +159,19 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
                 </div>
               ))
             ) : (
-              <div className="kicker text-faint">starting the engine…</div>
+              [
+                ["rows in flight", <span key="r" className="tabular animate-pulse font-mono text-[18px] font-semibold leading-none text-ink opacity-60">{BOOT.rows}</span>],
+                ["match rate", <span key="m" className="tabular animate-pulse font-mono text-[18px] font-semibold leading-none text-ink opacity-60">{BOOT.match}%</span>],
+                ["incidents", <span key="i" className="tabular animate-pulse font-mono text-[18px] font-semibold leading-none text-ink opacity-60">{BOOT.incidents}</span>],
+              ].map(([l, v], i) => (
+                <div key={l as string} className={i > 0 ? "border-l border-line pl-5 pr-5 sm:pl-6" : "pr-5"}>
+                  <div className="kicker text-faint">{l}</div>
+                  <div className="mt-1">{v}</div>
+                </div>
+              ))
             )}
           </div>
-          <p style={{ animationDelay: "340ms" }} className="rise mt-5 text-[12.5px] text-faint">
+          <p style={{ animationDelay: "340ms" }} className="rise mt-3 text-[12.5px] text-faint">
             nothing to sign up for · the batch is already running · every number on this
             page is live from the engine
           </p>
@@ -382,21 +409,29 @@ export function Landing({ batch, brain, onOpen, onHow, onPm, onRun, busy }: {
               </button>
             </div>
           </div>
-          {m && (
-            <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-6 sm:grid-cols-4">
-              {([
-                ["match rate", <CountUp key="mr" value={m.match_rate} decimals={1} suffix="%" className="font-mono text-[24px] font-semibold leading-none text-ink" />],
-                ["incidents", <CountUp key="inc" value={m.incidents_total} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
-                ["auto-resolved", <CountUp key="ar" value={m.auto_resolved} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
-                ["waiting on you", <CountUp key="ah" value={m.awaiting_human} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
-              ] as [string, ReactNode][]).map(([l, v]) => (
-                <div key={l}>
-                  <div>{v}</div>
-                  <div className="kicker mt-2.5 text-faint">{l}</div>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* always four stats — the deterministic boot values pulse
+              until the live batch lands, so the band never collapses */}
+          <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-6 sm:grid-cols-4">
+            {(m
+              ? ([
+                  ["match rate", <CountUp key="mr" value={m.match_rate} decimals={1} suffix="%" className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                  ["incidents", <CountUp key="inc" value={m.incidents_total} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                  ["auto-resolved", <CountUp key="ar" value={m.auto_resolved} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                  ["waiting on you", <CountUp key="ah" value={m.awaiting_human} className="font-mono text-[24px] font-semibold leading-none text-ink" />],
+                ] as [string, ReactNode][])
+              : ([
+                  ["match rate", <span key="mr" className="tabular animate-pulse font-mono text-[24px] font-semibold leading-none text-ink opacity-60">{BOOT.match}%</span>],
+                  ["incidents", <span key="inc" className="tabular animate-pulse font-mono text-[24px] font-semibold leading-none text-ink opacity-60">{BOOT.incidents}</span>],
+                  ["auto-resolved", <span key="ar" className="tabular animate-pulse font-mono text-[24px] font-semibold leading-none text-ink opacity-60">{BOOT.autoResolved}</span>],
+                  ["waiting on you", <span key="ah" className="tabular animate-pulse font-mono text-[24px] font-semibold leading-none text-ink opacity-60">{BOOT.awaiting}</span>],
+                ] as [string, ReactNode][])
+            ).map(([l, v]) => (
+              <div key={l}>
+                <div>{v}</div>
+                <div className="kicker mt-2.5 text-faint">{l}</div>
+              </div>
+            ))}
+          </div>
         </section>
       </Reveal>
     </div>

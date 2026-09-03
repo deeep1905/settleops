@@ -62,7 +62,7 @@ export default function App() {
     <div className="min-h-screen">
       {/* top bar */}
       <header className="sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <button className="flex items-center gap-2.5" onClick={() => setView("home")} title="overview">
             <LogoMark size={22} />
             <span className="text-[15px] font-semibold tracking-[-0.01em]">SettleOps</span>
@@ -104,7 +104,9 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pt-8 pb-20 sm:px-6">
+      {/* a hand wider than 6xl: the hero's two cards get proportional
+          room and the tables breathe — text columns still cap themselves */}
+      <main className="mx-auto max-w-7xl px-4 pt-8 pb-20 sm:px-6">
         {/* views compose themselves on navigation; incidents re-compose per id */}
         <div key={view === "incident" && current ? `incident-${current.id}` : view} className="view-in">
           {error && (
@@ -153,7 +155,7 @@ export default function App() {
           are; it does not repeat the site. Standard tokens — it follows the
           theme the way every other surface does. */}
       <footer className="border-t border-line bg-surface">
-        <div className="mx-auto max-w-6xl px-4 pb-12 pt-10 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 pb-12 pt-10 sm:px-6">
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
             {/* ---------------- the left column ---------------- */}
             <div className="flex shrink-0 flex-col lg:w-[264px]">

@@ -280,7 +280,7 @@ export function ChatBot({ view, onNavigate }: {
 
   /* the invitation fades after a while; the first pickup retires it */
   useEffect(() => {
-    const t = window.setTimeout(() => setHint(false), 7500);
+    const t = window.setTimeout(() => setHint(false), 5000);
     return () => window.clearTimeout(t);
   }, []);
 
